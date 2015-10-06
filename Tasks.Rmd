@@ -16,4 +16,4 @@ This project will analyze the data set from [Yelp Dataset Challenge](http://www.
 print(unzip("../Yelp_Data/yelp.zip", list = TRUE))
 ```
 
-Yelp is collecting the users' review for the facilities around the major cities across North America and Europe. Data set *business* collects the information of registed facilities. Data set *checkin* stores the timing and frequencies the user stay in every facility. Data set *review* sumarizes a single user's review on a registed facility. Data set *tip* summarizes the unique points of a facility recommended by a registed user. Data set *user* collects the information of registed users.
+Yelp is collecting the users' review for the businesses around the major cities across North America and Europe. Data set *business* collects the information from `r dim(yelp_business)[1]` businesses. Data set *checkin* stores the timing and frequencies the user stay in every business. Data set *review* sumarizes a single user's review on a registed business. Data set *tip* summarizes the unique points of a business recommended by a registed user. Data set *user* collects the information of registed users.

@@ -11,26 +11,53 @@ Bid <- "business_id"  # registed business in the data sets
 Uid <- "user_id"      # registed user in the data sets
 Rid <- "review_id"    # available review in the data sets
 
-grep(Bid, names(yelp_business))
-grep(Bid, names(yelp_checkin))
-grep(Bid, names(yelp_review))
-grep(Bid, names(yelp_tip))
-grep(Bid, names(yelp_user))
+# Explore features in each data set
 
-grep(Uid, names(yelp_business))
-grep(Uid, names(yelp_checkin))
-grep(Uid, names(yelp_review))
-grep(Uid, names(yelp_tip))
-grep(Uid, names(yelp_user))
+## business
+str(yelp_business$hours)          # Data frame
+names(yelp_business$hours)
+str(yelp_business$categories)     # List
+unlist(lapply(yelp_business$categories, length))   # number of categories assigned to the budiness
+table(unlist(lapply(yelp_business$categories, unique)))
+sort( table(yelp_business$city) ) # Summarize the location
+str(yelp_business$neighborhoods)  # List
+unlist(lapply(yelp_business$neighborhoods, length))   # number of neighborhood around the budiness
+###table(unlist(lapply(yelp_business$neighborhoods, unique)))
+class(yelp_business$attributes)   # Data frame
+str(yelp_business$attributes, max.level = 1)  
+names(yelp_business$attributes)
+table( sapply(yelp_business$attributes,  class) )  # Summarize calsses of 1st level attributes
+names( which( unlist( sapply(yelp_business$attributes,  is.data.frame)  ) == TRUE) ) # Get the attributes which are data frames
+str(yelp_business$attributes[, which( unlist( sapply(yelp_business$attributes,  is.data.frame)  ) == TRUE)] ) # Explore the 1st level attributes which are data frames
+sapply(yelp_business$attributes[, which( unlist( sapply(yelp_business$attributes,  is.data.frame)  ) == TRUE)], names ) # Show the names of 2nd level attributes
+sapply(yelp_business$attributes[, which( unlist( sapply(yelp_business$attributes,  is.data.frame)  ) == TRUE)], dim )[2,] # Show the numbers of 2nd level attributes
+summary( unlist( lapply( yelp_business$attributes$`Accepts Credit Cards`, unique) ) ) # Explore the 1st level attribute which is list
+sum(yelp_business$review_count)  # sum up review counts of all businesses
 
-grep(Rid, names(yelp_business))
-grep(Rid, names(yelp_checkin))
-grep(Rid, names(yelp_review))
-grep(Rid, names(yelp_tip))
-grep(Rid, names(yelp_user))
+## checkin
+str(yelp_checkin$checkin_info)
+names(yelp_checkin$checkin_info)
+colMeans(yelp_checkin$checkin_info, na.rm = TRUE)  # Mean check-in times for a business
+summary(yelp_checkin$checkin_info[1], na.rm = TRUE)
+
+## review
+str(yelp_review$votes)           # Data frame
+sum(yelp_review$votes)
+
+## user
+str(yelp_user$votes)             # Data frame
+sum(yelp_user$votes)
+sum(yelp_user$review_count)      # sum up review counts of all users
+str(yelp_user$friends)           # List
+unlist(lapply(yelp_user$friends, length))   # number of friends the user owned
+###table(unlist(lapply(yelp_user$friends, unique)))
+str(yelp_user$compliments)       # Data frame
+str(yelp_user$elite)             # List
+unlist(lapply(yelp_user$elite, length))  # how many years the user is alive on yelp
+table(unlist(lapply(yelp_user$elite, unique)))  # frequency table of alive years
 
 # Locations of businesses
-sort( table(yelp_business$city) )
+
 
 
 # Business open status
