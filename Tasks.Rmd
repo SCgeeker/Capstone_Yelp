@@ -1,0 +1,19 @@
+---
+title: 'Capstone: Yelp Data Analysis'
+author: "Sau-Chin Chen"
+output: html_document
+---
+```{r initial, cache.path="../Yelp_Data", echo=FALSE}
+source("./packageskit.R")
+load("../Yelp_Data/Raw.RData")
+```
+
+# Get Data
+
+This project will analyze the data set from [Yelp Dataset Challenge](http://www.yelp.com/dataset_challenge). The data set is downloaded from [this link](https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/yelp_dataset_challenge_academic_dataset.zip). I obtained and pre-processed the data set through the codes in [0GetData.R](0GetData.R). Here are files compressed in the zip file:
+
+```{r overview, cache.path="../Yelp_Data", echo=FALSE}
+print(unzip("../Yelp_Data/yelp.zip", list = TRUE))
+```
+
+Yelp is collecting the users' review for the facilities around the major cities across North America and Europe. Data set *business* collects the information of registed facilities. Data set *checkin* stores the timing and frequencies the user stay in every facility. Data set *review* sumarizes a single user's review on a registed facility. Data set *tip* summarizes the unique points of a facility recommended by a registed user. Data set *user* collects the information of registed users.

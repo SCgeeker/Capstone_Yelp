@@ -39,3 +39,4 @@ file.remove(dir("../Yelp_Data", pattern = "*.json", full.names = TRUE))
 
 # Save the raw data to the image file. Transfer the image file trhough personal cloud.
 save.image("../Yelp_Data/Raw.RData")
+
