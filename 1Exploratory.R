@@ -5,7 +5,6 @@ str( yelp_review, max.level = 1)
 str( yelp_tip, max.level = 1)
 str( yelp_user, max.level = 1)
 
-
 # Mark id columns
 Bid <- "business_id"  # registed business in the data sets
 Uid <- "user_id"      # registed user in the data sets

@@ -3,7 +3,7 @@ title: 'Capstone: Yelp Data Analysis'
 author: "Sau-Chin Chen"
 output: html_document
 ---
-```{r initial, cache.path="../Yelp_Data", echo=FALSE}
+```{r initial, cache.path="../Yelp_Data", echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 source("./packageskit.R")
 load("../Yelp_Data/Raw.RData")
 ```
@@ -12,8 +12,8 @@ load("../Yelp_Data/Raw.RData")
 
 This project will analyze the data set from [Yelp Dataset Challenge](http://www.yelp.com/dataset_challenge). The data set is downloaded from [this link](https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/yelp_dataset_challenge_academic_dataset.zip). I obtained and pre-processed the data set through the codes in [0GetData.R](0GetData.R). Here are files compressed in the zip file:
 
-```{r overview, cache.path="../Yelp_Data", echo=FALSE}
+```{r overview, cache.path="../Yelp_Data", echo=FALSE, warning=FALSE}
 print(unzip("../Yelp_Data/yelp.zip", list = TRUE))
 ```
 
-Yelp is collecting the users' review for the businesses around the major cities across North America and Europe. Data set *business* collects the information from `r dim(yelp_business)[1]` businesses. Data set *checkin* stores the timing and frequencies the user stay in every business. Data set *review* sumarizes a single user's review on a registed business. Data set *tip* summarizes the unique points of a business recommended by a registed user. Data set *user* collects the information of registed users.
+Yelp is collecting the users' review for the businesses around the major cities across North America and Europe. Data set *business* collects the information from `r dim(yelp_business)[1]` businesses. Data set *checkin* stores `r dim(yelp_checkin)[1]` durations and frequencies a user stay in every business. Data set *review* sumarizes `r dim(yelp_review)[1]` reviews for a registed business. Data set *tip* summarizes the `r dim(yelp_tip)[1]` recommendations for a business. Data set *user* collects the information from  `r dim(yelp_user)[1]` registed users.
