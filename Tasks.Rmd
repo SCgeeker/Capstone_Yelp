@@ -17,3 +17,6 @@ print(unzip("../Yelp_Data/yelp.zip", list = TRUE))
 ```
 
 Yelp is collecting the users' review for the businesses around the major cities across North America and Europe. Data set *business* collects the information from `r dim(yelp_business)[1]` businesses. Data set *checkin* stores `r dim(yelp_checkin)[1]` durations and frequencies a user stay in every business. Data set *review* sumarizes `r dim(yelp_review)[1]` reviews for a registed business. Data set *tip* summarizes the `r dim(yelp_tip)[1]` recommendations for a business. Data set *user* collects the information from  `r dim(yelp_user)[1]` registed users.
+
+# Explore Raw Data
+

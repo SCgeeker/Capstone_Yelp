@@ -1,3 +1,5 @@
+load("../Yelp_Data/Raw.RData")
+
 # Features in each data set
 str( yelp_business, max.level = 1)
 str( yelp_checkin, max.level = 1)
@@ -18,10 +20,13 @@ names(yelp_business$hours)
 str(yelp_business$categories)     # List
 unlist(lapply(yelp_business$categories, length))   # number of categories assigned to the budiness
 table(unlist(lapply(yelp_business$categories, unique)))
-sort( table(yelp_business$city) ) # Summarize the location
-str(yelp_business$neighborhoods)  # List
+sort( table(yelp_business$city) ) # Count the registed cities
+str(yelp_business$neighborhoods)  # List neighborhoods
 unlist(lapply(yelp_business$neighborhoods, length))   # number of neighborhood around the budiness
-###table(unlist(lapply(yelp_business$neighborhoods, unique)))
+table(unlist(lapply(yelp_business$state, unique)))  # Count the registed states 
+table(yelp_business$stars)        # frequency table of stars
+sum( is.na(yelp_business$longitude) ) # Check missing geographical data
+sum( is.na(yelp_business$latitude) ) # Check missing geographical data
 class(yelp_business$attributes)   # Data frame
 str(yelp_business$attributes, max.level = 1)  
 names(yelp_business$attributes)
@@ -55,9 +60,14 @@ str(yelp_user$elite)             # List
 unlist(lapply(yelp_user$elite, length))  # how many years the user is alive on yelp
 table(unlist(lapply(yelp_user$elite, unique)))  # frequency table of alive years
 
-# Locations of businesses
+## Preview business geographic locations
+plot( SpatialPoints( yelp_business[,c("longitude","latitude")], proj4string = CRS("+init=epsg:4326")), pch = 1)
 
+table( round(yelp_business[,c("longitude")]) )
+table( round(yelp_business[,c("latitude")]) )
+table( round(yelp_business[,c("longitude","latitude")]) )
 
+#dist(yelp_business[,c("longitude","latitude")], method = "manhattan")
 
 # Business open status
 table(yelp_business$open)

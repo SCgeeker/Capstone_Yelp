@@ -13,3 +13,10 @@ library("jsonlite")
 
 if(!require(dplyr)){install.packages('dplyr')}
 library("dplyr")
+
+if(!require(sp)){install.packages('sp')}
+library(sp)
+
+# if(!require(ggmap)){install.packages('ggmap')}
+# library(ggmap)
+

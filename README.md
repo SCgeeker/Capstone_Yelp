@@ -10,4 +10,7 @@ This repo collect the entities I finished during the yelp data set challenge.
 
 
 
-## 
+## dplyr
+Hadley Wickham [dplyr at Github](https://github.com/hadley/dplyr)
+Sean C. Anderson [dplyr and pipes: the basics](http://seananderson.ca/2014/09/13/dplyr-intro.html)
+
