@@ -47,6 +47,7 @@ summary(yelp_checkin$checkin_info[1], na.rm = TRUE)
 ## review
 str(yelp_review$votes)           # Data frame
 sum(yelp_review$votes)
+100 * ( table(yelp_review$stars)/sum(table(yelp_review$stars)) )   # Frequency table of stars
 
 ## user
 str(yelp_user$votes)             # Data frame
