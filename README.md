@@ -8,7 +8,7 @@ This repo collect the entities I finished during the yelp data set challenge.
 
 ## Text Mining
 
-
+[Basic Text Mining in R](https://rstudio-pubs-static.s3.amazonaws.com/31867_8236987cf0a8444e962ccd2aec46d9c3.html)
 
 ## dplyr
 Hadley Wickham [dplyr at Github](https://github.com/hadley/dplyr)

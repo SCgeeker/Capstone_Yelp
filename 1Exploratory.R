@@ -99,6 +99,7 @@ dim(yelp_review[(yelp_business$business_id[yelp_business$open == FALSE] %in% yel
 length( unique(yelp_tip$user_id) )
 length( unique(yelp_tip$business_id))
 summary(yelp_tip$likes)
+unique(yelp_tip$likes)
 table( paste(year(yelp_tip$date),month(yelp_tip$date)) )  # count of tip from each month
 ## tips are coded since 2009, April
 
@@ -230,7 +231,56 @@ table(yelp_business$Loc) ## Count how many businesses in each city
 table( tmp[yelp_review$business_id] ) # How many reviews in each city
 cor.test(table(yelp_business$Loc), table( tmp[yelp_review$business_id] ))  # More businesses in a city, more reviews in a city
 
-user_loc <- table(yelp_review$user_id, tmp[yelp_review$business_id]) # Record user's review shown for every city
+user_review_loc <- table(yelp_review$user_id, tmp[yelp_review$business_id]) # Record user's review shown for every city
+user_review_loc_df <- subset( data.frame( userid = rep(rownames(user_review_loc), dim(user_review_loc)[2]), Review_Count = as.numeric(user_review_loc), Loc = rep(colnames(user_review_loc),each = dim(user_review_loc)[1])), Review_Count != 0)
+table(user_review_loc_df$userid)[table(user_review_loc_df$userid) > 2]  # How many users posted reviews across more than two cities
+
+table( tmp[yelp_tip$business_id] ) # How many tips in each city
+cor.test(table(yelp_business$Loc), table( tmp[yelp_tip$business_id] ))  # More businesses in a city, more tips in a city
+
+user_tip_loc <- table(yelp_tip$user_id, tmp[yelp_tip$business_id]) # Record user's review shown for every city
+user_tip_loc_df <- subset( data.frame( userid = rep(rownames(user_tip_loc), dim(user_tip_loc)[2]), Tip_Count = as.numeric(user_tip_loc), Loc = rep(colnames(user_tip_loc),each = dim(user_tip_loc)[1])), Tip_Count != 0)
+table(user_tip_loc_df$userid)[table(user_tip_loc_df$userid) > 2]  # How many users posted tips across more than two cities
+
+yelp_business <- data.frame(yelp_business, True_review_count = table(yelp_review$business_id)[yelp_business$business_id], True_tip_count = table(yelp_tip$business_id)[yelp_business$business_id] )
+
+cor.test(yelp_business$stars, yelp_business$True_review_count)
+cor.test(yelp_business$stars, yelp_business$True_tip_count)
+# business star has weak positie correlation with (true) review counts and tip counts
+
+business_review_stars_stat <- tapply(yelp_review$stars, yelp_review$business_id, mean)
+business_tip_likes_stat <- tapply(yelp_tip$likes, yelp_tip$business_id, sum)
+cor.test( business_review_stars_stat[names(business_tip_likes_stat[business_tip_likes_stat > 0])], business_tip_likes_stat[business_tip_likes_stat > 0] )
+# A weak positive correlation beteen averaged reveiew stars and averaged tip likes (r = .013)
+# A higher but weak positive correlation beteen averaged reveiew stars and summed tip likes (r = .038)
+# The corrleation was up after excluded the likes = 0 (r = .057)
+
+table( round(business_review_stars_stat[names(business_tip_likes_stat)]) )  # check the distribution of review stars for the businesses having tips
+table(round(business_tip_likes_stat) )
+
+table( round(business_review_stars_stat[names(business_tip_likes_stat)]), round(business_tip_likes_stat) )  # Frequency table of review stars and tip likes
+
+
+## Text mining reviews and tips
+### Build Corpus
+Review_Corpus <- Corpus(VectorSource(yelp_review$text))
+# summary(Review_Corpus)
+Tip_Corpus <- Corpus(VectorSource(yelp_tip$text))
+# summary(Tip_Corpus)
+
+### Preprocessing docs
+Review_Corpus <- tm_map(Review_Corpus, removePunctuation)                  # Removing punctuation
+for(j in seq(Review_Corpus))   
+{   
+  Review_Corpus[[j]] <- gsub("/", " ", Review_Corpus[[j]])   
+  Review_Corpus[[j]] <- gsub("@", " ", Review_Corpus[[j]])   
+  Review_Corpus[[j]] <- gsub("\\|", " ", Review_Corpus[[j]])   
+}   
+
+Review_Corpus <- tm_map(Review_Corpus, removeNumbers)                      # Removing numbers
+Review_Corpus <- tm_map(Review_Corpus, tolower)                            # Converting to lowercase
+Review_Corpus <- tm_map(Review_Corpus, removeWords, stopwords("english"))  # Removing common words
+# Removing particular words: if necessary
 
 # 
-save.image("../Yelp_Data/Raw.RData")
+save.image("../Yelp_Data/Corpus.RData")

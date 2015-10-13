@@ -2,8 +2,14 @@
 if(!require(devtools)){install.packages('devtools')}
 library("devtools")
 
-# if(!require(tm)){install.packages('tm')}
-# library("tm")
+if(!require(tm)){install.packages('tm')}
+library("tm")
+
+if(!require(rJava)){install.packages('rJava')}
+library(rJava)
+
+if(!require(Rwordseg)){install.packages('Rwordseg')}
+library(Rwordseg)
 
 if(!require(ggplot2)){install.packages('ggplot2')}
 library("ggplot2")
