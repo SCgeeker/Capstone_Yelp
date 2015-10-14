@@ -227,6 +227,9 @@ length(yelp_review$business_id)
 tmp <- yelp_business$Loc
 names(tmp) <- yelp_business$business_id
 
+yelp_review <- data.frame(yelp_review, Loc = tmp[yelp_review$business_id])
+yelp_tip <- data.frame(yelp_tip, Loc = tmp[yelp_tip$business_id])
+
 table(yelp_business$Loc) ## Count how many businesses in each city
 table( tmp[yelp_review$business_id] ) # How many reviews in each city
 cor.test(table(yelp_business$Loc), table( tmp[yelp_review$business_id] ))  # More businesses in a city, more reviews in a city
@@ -260,27 +263,17 @@ table(round(business_tip_likes_stat) )
 
 table( round(business_review_stars_stat[names(business_tip_likes_stat)]), round(business_tip_likes_stat) )  # Frequency table of review stars and tip likes
 
+## Split texts by locations
+### Add location lables to reviews and tips
+yelp_review <- data.frame(yelp_review, Loc = tmp[yelp_review$business_id])
+yelp_tip <- data.frame(yelp_tip, Loc = tmp[yelp_tip$business_id])
+
+### filter the reviews and tips by location 
+length(yelp_review$text[yelp_review$Loc == unique(yelp_review$Loc)[9]])
+length(yelp_tip$text[yelp_tip$Loc == unique(yelp_tip$Loc)[10]])
 
 ## Text mining reviews and tips
-### Build Corpus
-Review_Corpus <- Corpus(VectorSource(yelp_review$text))
-# summary(Review_Corpus)
-Tip_Corpus <- Corpus(VectorSource(yelp_tip$text))
-# summary(Tip_Corpus)
-
-### Preprocessing docs
-Review_Corpus <- tm_map(Review_Corpus, removePunctuation)                  # Removing punctuation
-for(j in seq(Review_Corpus))   
-{   
-  Review_Corpus[[j]] <- gsub("/", " ", Review_Corpus[[j]])   
-  Review_Corpus[[j]] <- gsub("@", " ", Review_Corpus[[j]])   
-  Review_Corpus[[j]] <- gsub("\\|", " ", Review_Corpus[[j]])   
-}   
-
-Review_Corpus <- tm_map(Review_Corpus, removeNumbers)                      # Removing numbers
-Review_Corpus <- tm_map(Review_Corpus, tolower)                            # Converting to lowercase
-Review_Corpus <- tm_map(Review_Corpus, removeWords, stopwords("english"))  # Removing common words
-# Removing particular words: if necessary
-
+Review_docs <- 
+dim( subset(yelp_tip, Loc == unique(yelp_tip$Loc)[2]) )
 # 
 save.image("../Yelp_Data/Corpus.RData")

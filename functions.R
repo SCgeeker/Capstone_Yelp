@@ -123,7 +123,28 @@ City_Tag <- function(lat, lon){
     return(Tag)
 }
 
-# TestDF <- D_Cities(yelp_business$latitude, yelp_business$longitude)
 
-TAG <- City_Tag(yelp_business$latitude, yelp_business$longitude)
+Build_Cleaned_Docs <- function(text) {
+  ### Build Corpus
+  docs <- Corpus(VectorSource(text))
+  # summary(docs)
+ 
+  ### Preprocessing docs
+  docs <- tm_map(docs, removePunctuation)                  # Removing punctuation
+  for(j in seq(docs))   
+  {   
+    docs[[j]] <- gsub("/", " ", docs[[j]])   
+    docs[[j]] <- gsub("@", " ", docs[[j]])   
+    docs[[j]] <- gsub("\\|", " ", docs[[j]])   
+  }   
+  
+  docs <- tm_map(docs, removeNumbers)                      # Removing numbers
+  docs <- tm_map(docs, tolower)                            # Converting to lowercase
+  docs <- tm_map(docs, removeWords, stopwords("english"))  # Removing common words
+  # Removing particular words: if necessary
+  
+  return(docs)
+}
+
+
 
