@@ -131,17 +131,25 @@ Build_Cleaned_Docs <- function(text) {
  
   ### Preprocessing docs
   docs <- tm_map(docs, removePunctuation)                  # Removing punctuation
-  for(j in seq(docs))   
-  {   
-    docs[[j]] <- gsub("/", " ", docs[[j]])   
-    docs[[j]] <- gsub("@", " ", docs[[j]])   
-    docs[[j]] <- gsub("\\|", " ", docs[[j]])   
-  }   
   
   docs <- tm_map(docs, removeNumbers)                      # Removing numbers
+  
   docs <- tm_map(docs, tolower)                            # Converting to lowercase
   docs <- tm_map(docs, removeWords, stopwords("english"))  # Removing common words
   # Removing particular words: if necessary
+  # docs <- tm_map(docs, stemDocument)  # Removing common word endings (e.g., “ing”, “es”, “s”)
+  
+  docs <- tm_map(docs, stripWhitespace)                    # Removing white spaces
+  for(j in seq(docs))   
+  {   
+    docs[[j]] <- gsub("/", "", docs[[j]])   
+    docs[[j]] <- gsub("@", "", docs[[j]])   
+    docs[[j]] <- gsub("\\|", "", docs[[j]])   
+    docs[[j]] <- gsub("^ ", "", docs[[j]])   
+  }   
+  
+  
+  ## docs <- tm_map(docs, PlainTextDocument)                  # tells R to treat your preprocessed documents as text documents.
   
   return(docs)
 }

@@ -3,6 +3,8 @@ if(!require(devtools)){install.packages('devtools')}
 
 if(!require(tm)){install.packages('tm')}
 
+if(!require(SnowballC)){install.packages('SnowballC')}
+
 # if(!require(rJava)){install.packages('rJava')}
 # library(rJava)
 
@@ -42,3 +44,4 @@ library("ggplot2")
 library("jsonlite")
 library("lubridate")
 library("dplyr")
+library("SnowballC")

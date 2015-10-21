@@ -269,11 +269,44 @@ yelp_review <- data.frame(yelp_review, Loc = tmp[yelp_review$business_id])
 yelp_tip <- data.frame(yelp_tip, Loc = tmp[yelp_tip$business_id])
 
 ### filter the reviews and tips by location 
-length(yelp_review$text[yelp_review$Loc == unique(yelp_review$Loc)[9]])
-length(yelp_tip$text[yelp_tip$Loc == unique(yelp_tip$Loc)[10]])
+with(data = yelp_review, tapply(text, Loc, length))
+with(data = yelp_tip, tapply(text, Loc, length))
+#### The German city "Karlsruhe" is filled with the German words in reviews and tips.
+Text_City <- as.character( unique(yelp_business$Loc)[1:9] )
 
 ## Text mining reviews and tips
-Review_docs <- 
-dim( subset(yelp_tip, Loc == unique(yelp_tip$Loc)[2]) )
-# 
+## 
+Review_docs <- Build_Cleaned_Docs(yelp_review$text[yelp_review$Loc == Text_City[8]])
+Build_Cleaned_Docs(yelp_tip$text[yelp_tip$Loc == Text_City[8]])
+
+
+Tip_docs01 <- Build_Cleaned_Docs(yelp_tip$text[yelp_tip$Loc == Text_City[1]])
+Tip_docs02 <- Build_Cleaned_Docs(yelp_tip$text[yelp_tip$Loc == Text_City[2]])
+Tip_docs03 <- Build_Cleaned_Docs(yelp_tip$text[yelp_tip$Loc == Text_City[3]])
+Tip_docs04 <- Build_Cleaned_Docs(yelp_tip$text[yelp_tip$Loc == Text_City[4]])
+Tip_docs05 <- Build_Cleaned_Docs(yelp_tip$text[yelp_tip$Loc == Text_City[5]])
+Tip_docs06 <- Build_Cleaned_Docs(yelp_tip$text[yelp_tip$Loc == Text_City[6]])
+Tip_docs07 <- Build_Cleaned_Docs(yelp_tip$text[yelp_tip$Loc == Text_City[7]])
+Tip_docs08 <- Build_Cleaned_Docs(yelp_tip$text[yelp_tip$Loc == Text_City[8]])
+Tip_docs09 <- Build_Cleaned_Docs(yelp_tip$text[yelp_tip$Loc == Text_City[9]])
+
+Tip_docs <- list(Tip_docs01, Tip_docs02, Tip_docs03, Tip_docs04, Tip_docs05, Tip_docs06, Tip_docs07, Tip_docs08, Tip_docs09)
+names(Tip_docs)[1:9] <- Text_City
+rm(Tip_docs01, Tip_docs02, Tip_docs03, Tip_docs04, Tip_docs05, Tip_docs06, Tip_docs07, Tip_docs08, Tip_docs09)
+
+Review_docs01 <- Build_Cleaned_Docs(yelp_review$text[yelp_review$Loc == Text_City[1]])
+Review_docs02 <- Build_Cleaned_Docs(yelp_review$text[yelp_review$Loc == Text_City[2]])
+Review_docs03 <- Build_Cleaned_Docs(yelp_review$text[yelp_review$Loc == Text_City[3]])
+Review_docs04 <- Build_Cleaned_Docs(yelp_review$text[yelp_review$Loc == Text_City[4]])
+Review_docs05 <- Build_Cleaned_Docs(yelp_review$text[yelp_review$Loc == Text_City[5]])
+Review_docs06 <- Build_Cleaned_Docs(yelp_review$text[yelp_review$Loc == Text_City[6]])
+Review_docs07 <- Build_Cleaned_Docs(yelp_review$text[yelp_review$Loc == Text_City[7]])
+Review_docs08 <- Build_Cleaned_Docs(yelp_review$text[yelp_review$Loc == Text_City[8]])
+Review_docs09 <- Build_Cleaned_Docs(yelp_review$text[yelp_review$Loc == Text_City[9]])
+
+Review_docs <- list(Review_docs01, Review_docs02, Review_docs03, Review_docs04, Review_docs05, Review_docs06, Review_docs07, Review_docs08, Review_docs09)
+names(Review_docs)[1:9] <- Text_City
+rm(Review_docs01, Review_docs02, Review_docs03, Review_docs04, Review_docs05, Review_docs06, Review_docs07, Review_docs08, Review_docs09)
+
+
 save.image("../Yelp_Data/Corpus.RData")
