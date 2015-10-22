@@ -308,5 +308,35 @@ Review_docs <- list(Review_docs01, Review_docs02, Review_docs03, Review_docs04, 
 names(Review_docs)[1:9] <- Text_City
 rm(Review_docs01, Review_docs02, Review_docs03, Review_docs04, Review_docs05, Review_docs06, Review_docs07, Review_docs08, Review_docs09)
 
+Review_docs$Phoenix <- tm_map(Review_docs$Phoenix, PlainTextDocument)
+Review_docs$Pittsburgh <- tm_map(Review_docs$Pittsburgh, PlainTextDocument)
+Review_docs$Charlotte <- tm_map(Review_docs$Charlotte, PlainTextDocument)
+Review_docs$Madison <- tm_map(Review_docs$Madison, PlainTextDocument)
+Review_docs$`Urbana-Champaign` <- tm_map(Review_docs$`Urbana-Champaign`, PlainTextDocument)
+Review_docs$`Las Vegas` <- tm_map(Review_docs$`Las Vegas`, PlainTextDocument)
+Review_docs$Montreal <- tm_map(Review_docs$Montreal, PlainTextDocument)
+Review_docs$Waterloo <- tm_map(Review_docs$Waterloo, PlainTextDocument)
+Review_docs$Edinburgh <- tm_map(Review_docs$Edinburgh, PlainTextDocument)
+
+Tip_docs$Phoenix <- tm_map(Tip_docs$Phoenix, PlainTextDocument)
+Tip_docs$Pittsburgh <- tm_map(Tip_docs$Pittsburgh, PlainTextDocument)
+Tip_docs$Charlotte <- tm_map(Tip_docs$Charlotte, PlainTextDocument)
+Tip_docs$Madison <- tm_map(Tip_docs$Madison, PlainTextDocument)
+Tip_docs$`Urbana-Champaign` <- tm_map(Tip_docs$`Urbana-Champaign`, PlainTextDocument)
+Tip_docs$`Las Vegas` <- tm_map(Tip_docs$`Las Vegas`, PlainTextDocument)
+Tip_docs$Montreal <- tm_map(Tip_docs$Montreal, PlainTextDocument)
+Tip_docs$Waterloo <- tm_map(Tip_docs$Waterloo, PlainTextDocument)
+Tip_docs$Edinburgh <- tm_map(Tip_docs$Edinburgh, PlainTextDocument)
+
+Review_dtm <- list(DocumentTermMatrix(Review_docs[[1]]))
+for(i in 2:length(Review_docs)){
+  Review_dtm <- list( Review_dtm, DocumentTermMatrix(Review_docs[[i]]) )
+}
+
+Tip_dtm <- list(DocumentTermMatrix(Tip_docs[[1]]))
+for(i in 2:length(Tip_docs)){
+  Tip_dtm <- list(Tip_dtm, DocumentTermMatrix(Tip_docs[[i]]))
+}
 
 save.image("../Yelp_Data/Corpus.RData")
+

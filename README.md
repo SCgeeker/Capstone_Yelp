@@ -10,6 +10,9 @@ This repo collect the entities I finished during the yelp data set challenge.
 
 [Basic Text Mining in R](https://rstudio-pubs-static.s3.amazonaws.com/31867_8236987cf0a8444e962ccd2aec46d9c3.html)
 
+## Self-organizing map
+[Self-Organising Maps for Customer Segmentation using R]http://www.shanelynn.ie/self-organising-maps-for-customer-segmentation-using-r/
+
 ## dplyr
 Hadley Wickham [dplyr at Github](https://github.com/hadley/dplyr)
 Sean C. Anderson [dplyr and pipes: the basics](http://seananderson.ca/2014/09/13/dplyr-intro.html)
