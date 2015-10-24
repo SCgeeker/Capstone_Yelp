@@ -149,7 +149,7 @@ Build_Cleaned_Docs <- function(text) {
   }   
   
   
-  ## docs <- tm_map(docs, PlainTextDocument)                  # tells R to treat your preprocessed documents as text documents.
+  docs <- tm_map(docs, PlainTextDocument)                  # tells R to treat your preprocessed documents as text documents.
   
   return(docs)
 }
