@@ -124,6 +124,54 @@ City_Tag <- function(lat, lon){
 }
 
 
+Variables_Transfer <- function(DATA){
+  ### Label open/close information in numeric variable
+  tmp <- matrix(unlist( sapply( DATA$hours, as.vector) ), ncol =  7*2 )
+  hour = as.factor(apply(tmp,1,toString) )
+  ## 0 == no information; 1 == 24 hours open
+  levels(hour) <- c(2:(nlevels(hour)), 1)
+  DATA$hours = as.numeric(as.character(hour) ) - 1
+  
+  ### Count neighborhoods
+  DATA$neighborhoods <- unlist( lapply(DATA$neighborhood, length) )
+  
+  
+  ### Take and transfer attributes with information
+  ## codes in testing: ## str(DATA$attributes, max.level = 1)## ATTR <- DATA$attributes
+  
+  ## lift the variables under level 1 variables
+  ## chage list(Accept Credit Card) to logic values(TRUE, FALSE, NA)
+  for(i in rev(1:dim(DATA$attributes)[2]) ){
+    if(is.data.frame(DATA$attributes[,i]))
+    {DATA$attributes <- data.frame(DATA$attributes, DATA$attributes[,i]);DATA$attributes[,i] <- NULL}
+    if(is.list(DATA$attributes[,i]))
+    {DATA$attributes[,i] = unlist( lapply( DATA$attributes[,i] , function(x)ifelse(is.null(x), NA, x)) )}  ### From http://r.789695.n4.nabble.com/List-elements-of-NULL-to-value-td3064384.html
+  }
+  
+  ## Remove the variables with NA > 99%
+  for(i in rev(1:dim(DATA$attributes)[2]) ){
+    if(sum( !is.na(DATA$attributes[,i]) )/length(DATA$attributes[,i]) <= .01)
+      DATA$attributes[,i] <- NULL
+  }
+  
+  ## Transfer variable values to numeric
+  for(i in 1:dim(DATA$attributes)[2]){
+    if( is.logical(DATA$attributes[,i])  )  
+    {
+      ### For variables are logic
+      DATA$attributes[,i] <- replace(DATA$attributes[,i], c(TRUE, FALSE), c(1,0))
+    }
+    if( is.character( DATA$attributes[,i] ) )  
+    {
+      ### For variables are character
+      TMP = factor(DATA$attributes[,i], exclude = NULL)
+      levels(TMP)[1:(nlevels(TMP)-1)] <- 1:(nlevels(TMP) - 1)
+      DATA$attributes[,i] <- as.numeric(TMP)
+    }
+  }
+  
+  return(DATA)
+}
 
 
 Build_Cleaned_Docs <- function(text) {
@@ -139,7 +187,7 @@ Build_Cleaned_Docs <- function(text) {
   docs <- tm_map(docs, tolower)                            # Converting to lowercase
   docs <- tm_map(docs, removeWords, stopwords("english"))  # Removing common words
   # Removing particular words: if necessary
-  # docs <- tm_map(docs, stemDocument)  # Removing common word endings (e.g., “ing”, “es”, “s”)
+  # docs <- tm_map(docs, stemDocument)  # Removing common word endings
   
   docs <- tm_map(docs, stripWhitespace)                    # Removing white spaces
   for(j in seq(docs))   

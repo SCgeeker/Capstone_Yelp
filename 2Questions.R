@@ -64,33 +64,10 @@ yelp_business$stars  # average star scores
 head(yelp_business$attributes)  # Take the attributes by the category
 head(yelp_checkin$checkin_info) # Take the checkin info by the category
 
-yelp_FastFood <- yelp_business[grep(gsub("[()]","",FoodCategories )[1], gsub("[()]","",yelp_business$categories) ),c("business_id","hours", "review_count", "neighborhoods", "attributes")]
+yelp_FastFood <- yelp_business[grep(gsub("[()]","",FoodCategories )[1], gsub("[()]","",yelp_business$categories) ),c("business_id","Loc","hours", "review_count", "neighborhoods", "attributes")]
 
+yelp_FastFood <- Variables_Transfer(yelp_FastFood)
 
-### Label open/close information
-tmp <- matrix(unlist( sapply( yelp_FastFood$hours, as.vector) ), ncol =  7*2 )
-hours = as.factor(apply(tmp,1,toString) )
-HOURS_PATTERNS = levels(hours)
-names(HOURS_PATTERNS) <- 1:length(HOURS_PATTERNS)
-levels(hours) <- 1:nlevels(as.factor(apply(tmp,1,toString) ))
-
-### Count neighborhoods
-yelp_FastFood$neighborhoods <- unlist( lapply(yelp_FastFood$neighborhood, length) )
-
-
-### Take and transfer attributes with information
-str( yelp_FastFood$attributes )
-
-matrix(unlist( sapply( yelp_FastFood$attributes$Ambience, as.vector) ), ncol =  dim(yelp_FastFood$attributes$Ambience)[2] )
-names(yelp_FastFood$attributes$Ambience)
-
-
-lapply(yelp_FastFood$attributes$`Accepts Credit Cards`, as.numeric)
-
-head( transform(yelp_FastFood$attributes, yelp_FastFood$attributes$`Accepts Credit Cards` = unlist(yelp_FastFood$attributes$`Accepts Credit Cards`)) )
-
-CARDS <- as.numeric( unlist(lapply(yelp_FastFood$attributes$`Accepts Credit Cards`, is.null)) )
-unlist(yelp_FastFood$attributes$`Accepts Credit Cards`)
 
 ## If the location has the singificant contribution... text mining on reviews and tips
 ## If the location has the insingificant contribution... conclude the model from the attributes.
