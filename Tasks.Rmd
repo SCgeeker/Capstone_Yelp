@@ -4,8 +4,10 @@ author: "Sau-Chin Chen"
 output: html_document
 ---
 ```{r initial, cache.path="../Yelp_Data", echo=FALSE, results='hide', warning=FALSE, message=FALSE}
-source("./packageskit.R")
 load("../Yelp_Data/Raw.RData")
+source("./packageskit.R")
+source("./functions.R")
+yelp_business <- data.frame(yelp_business, Loc = City_Tag(yelp_business$latitude, yelp_business$longitude))
 ```
 
 # Get Data
@@ -17,6 +19,15 @@ print(unzip("../Yelp_Data/yelp.zip", list = TRUE))
 ```
 
 Yelp is collecting the users' review for the businesses around the major cities across North America and Europe. Data set *business* collects the information from `r dim(yelp_business)[1]` businesses. Data set *checkin* stores `r dim(yelp_checkin)[1]` durations and frequencies a user stay in every business. Data set *review* sumarizes `r dim(yelp_review)[1]` reviews for a registed business. Data set *tip* summarizes the `r dim(yelp_tip)[1]` recommendations for a business. Data set *user* collects the information from  `r dim(yelp_user)[1]` registed users.
+
+# Question and hypothesis
+
+If the data set could show us the dimensions how users evaluate businesses, Will we figure a global standard across cities or many local standards in each city? When we focus on the one category of business, such as Pizza, we could gather the variables to cluster this business. If one set of variables gathered from one city could cluster the businesses in the other city, they represent the global standard for this business. Otherwise, every city has the local standard. We calcuated how many categories are collected in the data set and how many businesses are labeled in every category. Here are the top 30 business categories. We find out some comparable categories in this list. For example, "Fast Food" and "Pizz"; "Chinese" and "Italian".
+
+```{r categories, cache.path="../Yelp_Data", echo=FALSE, warning=FALSE, message=FALSE}
+sort( table(unlist(yelp_business$categories)) , decreasing = TRUE) [1:30]
+```
+
 
 # Explore Raw Data
 

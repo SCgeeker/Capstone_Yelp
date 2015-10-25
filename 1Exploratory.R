@@ -55,8 +55,10 @@ City_Neighbor[[1]][["Neighborhood_Size"]]
 str(yelp_business$hours)          # Data frame
 names(yelp_business$hours)
 table(yelp_business$open)         # Business open status
-str(yelp_business$categories)     # List
-unlist(lapply(yelp_business$categories, length))   # number of categories assigned to the budiness
+str(yelp_business$categories)     # List of categories
+length( unique( unlist(yelp_business$categories) ) ) # how many categories this data set collected
+sort( table(unlist(yelp_business$categories)) , decreasing = TRUE) # Frequencies of categories in this data set
+# unlist(lapply(yelp_business$categories, length))   # number of categories assigned to the budiness
 table( unlist(lapply(yelp_business$categories, length)) ) # How many categories were labeled to a business
 sort( table(unlist(lapply(yelp_business$categories, unique))), decreasing = TRUE)[1:30] # How many categories the business was labeled
 table(yelp_business$stars)        # frequency table of stars
@@ -82,6 +84,7 @@ yelp_business$name[yelp_business$review_count >= 1000]
 
 cor.test(yelp_business$review_count, yelp_business$stars)
 ## A significant but small positive correlation (r = .023) between review counts and business stars
+
 
 ## review
 length(unique(yelp_review$review_id))    # every text is unique

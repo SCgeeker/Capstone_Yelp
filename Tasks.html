@@ -87,7 +87,45 @@ img {
 ## 6   98451808 2015-01-23 00:49:00
 ## 7  166192435 2015-01-23 00:49:00
 ## 8     114263 2015-02-05 02:38:00</code></pre>
-<p>Yelp is collecting the users’ review for the businesses around the major cities across North America and Europe. Data set <em>business</em> collects the information from 61184 businesses. Data set <em>checkin</em> stores the timing and frequencies the user stay in every business. Data set <em>review</em> sumarizes a single user’s review on a registed business. Data set <em>tip</em> summarizes the unique points of a business recommended by a registed user. Data set <em>user</em> collects the information of registed users.</p>
+<p>Yelp is collecting the users’ review for the businesses around the major cities across North America and Europe. Data set <em>business</em> collects the information from 61184 businesses. Data set <em>checkin</em> stores 45166 durations and frequencies a user stay in every business. Data set <em>review</em> sumarizes 1569264 reviews for a registed business. Data set <em>tip</em> summarizes the 495107 recommendations for a business. Data set <em>user</em> collects the information from 366715 registed users.</p>
+</div>
+<div id="question-and-hypothesis" class="section level1">
+<h1>Question and hypothesis</h1>
+<p>If the data set could show us the dimensions how users evaluate businesses, Will we figure a global standard across cities or many local standards in each city? When we focus on the one category of business, such as Pizza or Cafe, we could gather the variables to cluster this business. If one set of variables gathered from one city could cluster the businesses in the other city, they represent the global standard for this business. Otherwise, every city has the local standard. We calcuated how many categories are collected in the data set and how many businesses are labeled in every category. Here are the top 30 business categories. We find out some comparable categories in this list. For example, “Fast Food” and “Pizz”; “Chinese” and “Italian”.</p>
+<pre><code>## 
+##               Restaurants                  Shopping 
+##                     21892                      8919 
+##                      Food             Beauty &amp; Spas 
+##                      7862                      4738 
+##                 Nightlife                      Bars 
+##                      4340                      3628 
+##          Health &amp; Medical                Automotive 
+##                      3213                      2965 
+##             Home Services                   Fashion 
+##                      2853                      2566 
+##               Active Life Event Planning &amp; Services 
+##                      2470                      2467 
+##                 Fast Food                     Pizza 
+##                      2383                      2223 
+##                   Mexican            Local Services 
+##                      2208                      2144 
+##           Hotels &amp; Travel    American (Traditional) 
+##                      2131                      2113 
+##                Sandwiches      Arts &amp; Entertainment 
+##                      1981                      1946 
+##              Coffee &amp; Tea                   Italian 
+##                      1890                      1633 
+##                   Chinese            American (New) 
+##                      1496                      1494 
+##                   Burgers               Hair Salons 
+##                      1481                      1388 
+##                    Hotels               Nail Salons 
+##                      1307                      1256 
+##                   Grocery               Auto Repair 
+##                      1233                      1220</code></pre>
+</div>
+<div id="explore-raw-data" class="section level1">
+<h1>Explore Raw Data</h1>
 </div>
 
 

@@ -124,6 +124,8 @@ City_Tag <- function(lat, lon){
 }
 
 
+
+
 Build_Cleaned_Docs <- function(text) {
   ### Build Corpus
   docs <- Corpus(VectorSource(text))
