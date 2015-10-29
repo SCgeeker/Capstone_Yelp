@@ -129,8 +129,8 @@ Variables_Transfer <- function(DATA){
   tmp <- matrix(unlist( sapply( DATA$hours, as.vector) ), ncol =  7*2 )
   hour = as.factor(apply(tmp,1,toString) )
   ## 0 == no information; 1 == 24 hours open
-  levels(hour) <- c(2:(nlevels(hour)), 1)
-  DATA$hours = as.numeric(as.character(hour) ) - 1
+  levels(hour) <- c(1:(nlevels(hour) - 1), 0)
+  DATA$hours = as.numeric(as.character(hour) )
   
   ### Count neighborhoods
   DATA$neighborhoods <- unlist( lapply(DATA$neighborhood, length) )
@@ -148,9 +148,9 @@ Variables_Transfer <- function(DATA){
     {DATA$attributes[,i] = unlist( lapply( DATA$attributes[,i] , function(x)ifelse(is.null(x), NA, x)) )}  ### From http://r.789695.n4.nabble.com/List-elements-of-NULL-to-value-td3064384.html
   }
   
-  ## Remove the variables with NA > 99%
+  ## Remove the variables with NA > 90%
   for(i in rev(1:dim(DATA$attributes)[2]) ){
-    if(sum( !is.na(DATA$attributes[,i]) )/length(DATA$attributes[,i]) <= .01)
+    if(sum( !is.na(DATA$attributes[,i]) )/length(DATA$attributes[,i]) <= .10)
       DATA$attributes[,i] <- NULL
   }
   

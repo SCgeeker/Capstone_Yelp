@@ -12,6 +12,8 @@ table(idi[yelp_review$business_id]) # How many reviews in each city
 table(idi[yelp_tip$business_id]) # How many tips in each city
 table(yelp_business$Loc) ## How many businesses in every city
 
+
+
 ## Average reviews for a bussiness in every city
 table( idi[yelp_review$business_id] )/table(yelp_business$Loc)
 
@@ -64,10 +66,98 @@ yelp_business$stars  # average star scores
 head(yelp_business$attributes)  # Take the attributes by the category
 head(yelp_checkin$checkin_info) # Take the checkin info by the category
 
-yelp_FastFood <- yelp_business[grep(gsub("[()]","",FoodCategories )[1], gsub("[()]","",yelp_business$categories) ),c("business_id","Loc","hours", "review_count", "neighborhoods", "attributes")]
+yelp_FastFood <- yelp_business[grep(gsub("[()]","",FoodCategories )[1], gsub("[()]","",yelp_business$categories) ),c("business_id","Loc","stars","hours", "review_count", "neighborhoods", "attributes")]
 
 yelp_FastFood <- Variables_Transfer(yelp_FastFood)
 
+##  Distribuions of stars among cities
+table(yelp_FastFood$Loc)
+chisq.test( table(yelp_FastFood$stars, yelp_FastFood$Loc) )
+chisq.test( table(yelp_FastFood$stars, yelp_FastFood$Loc)[,c(4,7)] )
+chisq.test( table(yelp_FastFood$stars, yelp_FastFood$Loc)[,c(1,2)] )
+chisq.test( table(yelp_FastFood$stars, yelp_FastFood$Loc)[,-c(1,2,4,7)] )
 
+
+apply(yelp_FastFood$attributes, 2, unique) 
+
+## Cluster Fast Food by self-organising map
+## codes are from "Self-Organising Maps for Customer Segmentation using R" 
+## http://www.shanelynn.ie/self-organising-maps-for-customer-segmentation-using-r/
+library(kohonen)
+tmp <- yelp_FastFood$attributes + 1
+tmp <- replace(tmp, is.na(tmp), 0)
+data_train <- data.frame(yelp_FastFood[, c(4, 5, 6)], tmp)
+rm(tmp)
+data_train_matrix <- as.matrix(scale(data_train))  # remove the NA values in the data
+som_grid <- somgrid(xdim = 30, ydim=30, topo="hexagonal")
+som_model <- som(data_train_matrix, 
+                 grid=som_grid, 
+                 rlen=100, 
+                 alpha=c(0.05,0.01), 
+                 keep.data = TRUE,
+                 n.hood='circular' )
+
+plot(som_model, type="changes")
+plot(som_model, type="count")
+plot(som_model, type="codes")
+
+mydata <- som_model$codes 
+wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var)) 
+for (i in 2:15) {
+  wss[i] <- sum(kmeans(mydata, centers=i)$withinss)
+}
+plot(wss)
+
+som_cluster <- cutree(hclust(dist(som_model$codes)), 6)
+
+pretty_palette <- c("black","red","green3","blue","cyan","magenta","yellow","gray")
+plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "Clusters") 
+add.cluster.boundaries(som_model, som_cluster)
+
+plot(som_model, type="codes", bgcol = pretty_palette[som_cluster], main = "Clusters")
+add.cluster.boundaries(som_model, som_cluster)
+
+## Add clusters back to the raw observations
+yelp_FastFood <- data.frame(yelp_FastFood, cluster=som_cluster[som_model$unit.classif])
+table(yelp_FastFood$Loc, yelp_FastFood$cluster)
+chisq.test(table(yelp_FastFood$Loc, yelp_FastFood$cluster))
+
+table(yelp_FastFood$stars, yelp_FastFood$cluster)
+### Cluster 6 have only 6 shopes that located in Las Vegas and Phoenix
+
+## SOM on Las Vegas and Phoenix
+yelp_FastFood_LV_P = subset(yelp_FastFood, (Loc == "Las Vegas"| Loc == "Phoenix" ) )
+tmp <- yelp_FastFood_LV_P$attributes + 1
+tmp <- replace(tmp, is.na(tmp), 0)
+data_train <- data.frame(yelp_FastFood_LV_P[, c(4, 5, 6)], tmp)
+rm(tmp)
+data_train_matrix <- as.matrix(scale(data_train))  # remove the NA values in the data
+som_grid <- somgrid(xdim = 30, ydim=30, topo="hexagonal")
+som_model <- som(data_train_matrix, 
+                 grid=som_grid, 
+                 rlen=100, 
+                 alpha=c(0.05,0.01), 
+                 keep.data = TRUE,
+                 n.hood='circular' )
+plot(som_model, type="changes")
+mydata <- som_model$codes 
+wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var)) 
+for (i in 2:15) {
+  wss[i] <- sum(kmeans(mydata, centers=i)$withinss)
+}
+plot(wss)
+som_cluster <- cutree(hclust(dist(som_model$codes)), 6)
+
+pretty_palette <- c("black","red","green3","blue","cyan","magenta","yellow","gray")
+plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "Clusters") 
+add.cluster.boundaries(som_model, som_cluster)
+
+plot(som_model, type="codes", bgcol = pretty_palette[som_cluster], main = "Clusters")
+add.cluster.boundaries(som_model, som_cluster)
+
+yelp_FastFood_LV_P <- data.frame(yelp_FastFood_LV_P, cluster=som_cluster[som_model$unit.classif])
+
+table(yelp_FastFood_LV_P$stars, yelp_FastFood_LV_P$cluster)
+table(yelp_FastFood_LV_P$Loc, yelp_FastFood_LV_P$cluster)
 ## If the location has the singificant contribution... text mining on reviews and tips
 ## If the location has the insingificant contribution... conclude the model from the attributes.

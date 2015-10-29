@@ -232,6 +232,7 @@ names(tmp) <- yelp_business$business_id
 
 yelp_review <- data.frame(yelp_review, Loc = tmp[yelp_review$business_id])
 yelp_tip <- data.frame(yelp_tip, Loc = tmp[yelp_tip$business_id])
+rm(tmp)
 
 table(yelp_business$Loc) ## Count how many businesses in each city
 table( tmp[yelp_review$business_id] ) # How many reviews in each city
