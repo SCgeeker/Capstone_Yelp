@@ -204,5 +204,24 @@ Build_Cleaned_Docs <- function(text) {
   return(docs)
 }
 
-
+Make_Som_Model <- function(df, city, x, y) {
+  if( (city %in% c("Charlotte","Edinburgh","Karlsruhe","Las Vegas","Madison",
+      "Montreal","Phoenix","Pittsburgh","Urbana-Champaign","Waterloo") ) == TRUE ){
+    require(kohonen)
+    tmp <- df[df$Loc == city,]$attributes + 1
+    tmp <- replace(tmp, is.na(tmp), 0)
+    data_train <- data.frame(df[df$Loc == city, c(4, 5, 6)], tmp)
+    rm(tmp)
+    data_train_matrix <- as.matrix(scale(data_train))  # remove the NA values in the data
+    som_grid <- somgrid(xdim = x, ydim= y, topo="hexagonal")
+    som_model <- som(data_train_matrix, 
+                     grid=som_grid, 
+                     rlen=100, 
+                     alpha=c(0.05,0.01), 
+                     keep.data = TRUE,
+                     n.hood='circular' )
+    
+  }
+  return(som_model)
+}
 
