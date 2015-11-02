@@ -138,7 +138,7 @@ xval.the.model = function(data, k = 10, cluster, alpha, ridge) {
                    # subset the test data.
                      dtest = dtest[, nodes(model)]
                   
-                     cat("  > model has", length(nodes(model)), "nodes.\n")
+                     cat("  model has", length(nodes(model)), "nodes.\n")
                   
                      # predict each trait in turn, given all the parents.
                        for (t in traits)
@@ -161,9 +161,9 @@ xval.the.model = function(data, k = 10, cluster, alpha, ridge) {
          for (t in traits) {
           
              predcor[t] = cor(causal[, t], data[unlist(kcv), t])
-             cat("  > PREDCOR(", t, "):", predcor[t], "\n")
+             cat("  PREDCOR(", t, "):", predcor[t], "\n")
              postcor[t] = cor(posterior[, t], data[unlist(kcv), t])
-             cat("  > POSTCOR(", t, "):", postcor[t], "\n")
+             cat("  POSTCOR(", t, "):", postcor[t], "\n")
           
            }#FOR
         
@@ -172,3 +172,65 @@ xval.the.model = function(data, k = 10, cluster, alpha, ridge) {
                            models = lapply(predicted, `[[`, "model")))
         
        }#XVAL.THE.MODEL
+
+
+
+cl = makeCluster(10)
+invisible(clusterEvalQ(cl, library(bnlearn)))
+invisible(clusterEvalQ(cl, library(lme4)))
+clusterExport(cl = cl, c("traits", "genes", "ids", "fit.the.model"))
+pr001 = vector(10, mode = "list")
+for (i in 1:10)
+   pr001[[i]] = xval.the.model(magic, cluster = cl, alpha = 0.01, ridge = FALSE)
+stopCluster(cl)
+
+pred.summary = sapply(pr001, `[[`, "predcor")
+print(rowMeans(pred.summary))
+
+post.summary = sapply(pr001, `[[`, "postcor")
+print(rowMeans(post.summary))
+
+
+# gather all the arc lists.
+arclist = list()
+
+  for (i in seq_along(pr001)) {
+    
+   # extract the models.
+     run = pr001[[i]]$models
+      
+     for (j in seq_along(run))
+         arclist[[length(arclist) + 1]] = arcs(run[[j]])
+        
+     }#FOR
+
+# compute the arc strengths.
+nodes = unique(unlist(arclist))
+strength = custom.strength(arclist, nodes = nodes)
+# estimate the threshold and average the networks.
+averaged = averaged.network(strength)
+
+
+# subset the network to remove isolated nodes.
+relevant.nodes = nodes(averaged)[sapply(nodes, degree, object = averaged) > 0]
+averaged2 = subgraph(averaged, relevant.nodes)
+strength2 = strength[(strength$from %in% relevant.nodes) &
+                      (strength$to %in% relevant.nodes), ]
+gR = strength.plot(averaged2, strength2, shape = "rectangle", layout = "fdp")
+
+## From http://stackoverflow.com/questions/18023300/is-rgraphviz-no-longer-available-for-r
+## You need to install it directly from the bioconductors site.
+## source("http://bioconductor.org/biocLite.R")
+## biocLite("Rgraphviz")
+
+require("Rgraphviz")
+nodeRenderInfo(gR)$fill = "lightblue"
+nodeRenderInfo(gR)$fill = "lightblue"
+nodeRenderInfo(gR)$col = "darkblue"
+nodeRenderInfo(gR)$fill[traits] = "limegreen"
+nodeRenderInfo(gR)$col[traits] = "darkgreen"
+a = arcs(subgraph(averaged, traits))
+a = as.character(interaction(a[, "from"], a[, "to"], sep = "~"))
+edgeRenderInfo(gR)$col = "grey"
+edgeRenderInfo(gR)$col[a] = "darkgreen"
+renderGraph(gR)
