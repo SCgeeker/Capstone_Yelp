@@ -22,12 +22,17 @@ Yelp is collecting the users' review for the businesses around the major cities 
 
 # Question and hypothesis
 
-If the data set could show us the dimensions how users evaluate businesses, Will we figure a global standard across cities or many local standards in each city? When we focus on the one category of business, such as Pizza, we could gather the variables to cluster this business. If one set of variables gathered from one city could cluster the businesses in the other city, they represent the global standard for this business. Otherwise, every city has the local standard. We calcuated how many categories are collected in the data set and how many businesses are labeled in every category. Here are the top 30 business categories. We find out some comparable categories in this list. For example, "Fast Food" and "Pizz"; "Chinese" and "Italian".
+If the data set could show us the variables how users evaluate a businesses, Will we figure a global standard across cities or many local standards in each city?  
+If one set of variables gathered from one city could cluster the businesses in the other city, they represent the global standard for this business. Otherwise, every city has the local standard. 
+
+# Explore Raw Business Data
+When we focus on the one category of business, such as Pizza or Chinese restaurants, we could compute the relations of attributes and stars of businesses. At first, We calcuated how many categories are collected in the data set and how many businesses are labeled in every category. Here are the top 30 categories. We find out some comparable categories in this list. For example, "Fast Food" and "Pizza"; "Chinese" and "Italian".
 
 ```{r categories, cache.path="../Yelp_Data", echo=FALSE, warning=FALSE, message=FALSE}
 sort( table(unlist(yelp_business$categories)) , decreasing = TRUE) [1:30]
 ```
 
-
-# Explore Raw Data
-
+Fixed: categories
+Primary: stars
+secondary: Loc(city),  neighbors(numbers), hours(types), open(T, F)
+Third: attributes(numbers, NA -> 0, 1 -> 2, 2 -> 3, etc.)

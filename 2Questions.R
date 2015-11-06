@@ -80,6 +80,8 @@ table(yelp_Chinese$Loc)
 with(data = yelp_Chinese, table(stars, Loc))
 chisq.test( table(yelp_Chinese$stars, yelp_Chinese$Loc) )
 
+## Ready to try BBN 
+
 
 ## If the location has the singificant contribution... text mining on reviews and tips
 ## If the location has the insingificant contribution... conclude the model from the attributes.
