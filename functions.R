@@ -125,15 +125,17 @@ City_Tag <- function(lat, lon){
 
 
 Variables_Transfer <- function(DATA){
-  ### Label open/close information in numeric variable
+    ### Label open/close information in numeric variable
   tmp <- matrix(unlist( sapply( DATA$hours, as.vector) ), ncol =  7*2 )
   hour = as.factor(apply(tmp,1,toString) )
   ## 0 == no information; 1 == 24 hours open
   levels(hour) <- c(1:(nlevels(hour) - 1), 0)
   DATA$hours = as.numeric(as.character(hour) )
   
+  DATA$review_count = as.numeric(DATA$review_count)
+  
   ### Count neighborhoods
-  DATA$neighborhoods <- unlist( lapply(DATA$neighborhood, length) )
+  DATA$neighborhoods = as.numeric( unlist( lapply(DATA$neighborhood, length) ) )
   
   
   ### Take and transfer attributes with information
@@ -160,6 +162,7 @@ Variables_Transfer <- function(DATA){
     {
       ### For variables are logic
       DATA$attributes[,i] <- replace(DATA$attributes[,i], c(TRUE, FALSE), c(1,0))
+      DATA$attributes[,i] <- DATA$attributes[,i] + 1
     }
     if( is.character( DATA$attributes[,i] ) )  
     {
@@ -170,8 +173,16 @@ Variables_Transfer <- function(DATA){
     }
   }
   
+  ### Transfer NA to 0. From http://stackoverflow.com/questions/8161836/how-do-i-replace-na-values-with-zeros-in-r
+  
+  DATA$attributes[is.na(DATA$attributes)] <- 0
+  
+  DATA = data.frame(DATA, DATA$attributes)
+  DATA$attributes <- NULL
+  
   return(DATA)
 }
+
 
 
 Build_Cleaned_Docs <- function(text) {

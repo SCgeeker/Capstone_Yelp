@@ -20,6 +20,14 @@ print(unzip("../Yelp_Data/yelp.zip", list = TRUE))
 
 Yelp is collecting the users' review for the businesses around the major cities across North America and Europe. Data set *business* collects the information from `r dim(yelp_business)[1]` businesses. Data set *checkin* stores `r dim(yelp_checkin)[1]` durations and frequencies a user stay in every business. Data set *review* sumarizes `r dim(yelp_review)[1]` reviews for a registed business. Data set *tip* summarizes the `r dim(yelp_tip)[1]` recommendations for a business. Data set *user* collects the information from  `r dim(yelp_user)[1]` registed users.
 
+# Adjust the locations of businesses
+Although each bussines in the business data set has the information of its location (full_address, city, state), these information are a mass because there are many users' typo. We use the geographical information (longitude, latitude) to adjust the location of each business. The result is that we add the new column 'Loc' to the business data set with the following codes.
+
+```{r update_business, cache.path="../Yelp_Data", results='hide'}
+yelp_business <- data.frame(yelp_business, Loc = City_Tag(yelp_business$latitude, yelp_business$longitude))
+```
+
+
 # Question and hypothesis
 
 If the data set could show us the variables how users evaluate a businesses, Will we figure a global standard across cities or many local standards in each city?  

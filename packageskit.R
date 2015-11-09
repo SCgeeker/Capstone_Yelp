@@ -3,7 +3,7 @@ if(!require(devtools)){install.packages('devtools')}
 
 if(!require(tm)){install.packages('tm')}
 
-if(!require(SnowballC)){install.packages('SnowballC')}
+# if(!require(SnowballC)){install.packages('SnowballC')}
 
 # if(!require(rJava)){install.packages('rJava')}
 # library(rJava)
@@ -36,6 +36,10 @@ if(!require(dplyr)){install.packages('dplyr')}
 
 # if(!require(ggmap)){install.packages('ggmap')}
 # library(ggmap)
+#library("SnowballC")
+if(!require(bnlearn)){install.packages('lme4')}
+if(!require(bnlearn)){install.packages('bnlearn')}
+if(!require(parallel)){install.packages('parallel')}
 
 
 library("devtools")
@@ -44,4 +48,7 @@ library("ggplot2")
 library("jsonlite")
 library("lubridate")
 library("dplyr")
-library("SnowballC")
+library("lme4")
+library("bnlearn")
+library("parallel")
+library("Rgraphviz")

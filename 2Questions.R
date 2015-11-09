@@ -72,7 +72,7 @@ head(yelp_checkin$checkin_info) # Take the checkin info by the category
 yelp_FastFood <- yelp_business[grep(gsub("[()]","",FoodCategories )[1], gsub("[()]","",yelp_business$categories) ),c("business_id","Loc","stars","hours", "review_count", "neighborhoods", "attributes")]
 yelp_FastFood <- Variables_Transfer(yelp_FastFood)
 
-yelp_Chinese <- yelp_business[grep(gsub("[()]","",FoodCategories )[1], gsub("[()]","",yelp_business$categories) ),c("business_id","Loc","stars","hours", "review_count", "neighborhoods", "attributes")]
+yelp_Chinese <- yelp_business[grep(gsub("[()]","",FoodCategories )[8], gsub("[()]","",yelp_business$categories) ),c("business_id","Loc","stars","hours", "review_count", "neighborhoods", "attributes")]
 yelp_Chinese <- Variables_Transfer(yelp_Chinese)
 
 ##  Distribuions of stars among cities
@@ -80,8 +80,18 @@ table(yelp_Chinese$Loc)
 with(data = yelp_Chinese, table(stars, Loc))
 chisq.test( table(yelp_Chinese$stars, yelp_Chinese$Loc) )
 
-## Ready to try BBN 
+## BBN Graphs
+### Fast Food
+yelp_FastFood.gs <- gs(yelp_FastFood[,c(3,2,4:43)])
+yelp_FastFood.hc <- hc(yelp_FastFood[,c(3,2,4:43)])
+plot(yelp_FastFood.gs,  main  =  "Constraint-based  algorithms",  highlight  =  c("stars",  "Loc"))
+plot(yelp_FastFood.hc,  main  =  "Hill-Climbing",  highlight  =  c("stars",  "Loc"))
 
+### Chinese
+yelp_Chinese.gs <- gs(yelp_Chinese[,c(3,2,4:43)])
+yelp_Chinese.hc <- hc(yelp_Chinese[,c(3,2,4:43)])
+plot(yelp_Chinese.gs,  main  =  "Constraint-based  algorithms",  highlight  =  c("stars",  "Loc"))
+plot(yelp_Chinese.hc,  main  =  "Hill-Climbing",  highlight  =  c("stars",  "Loc"))
 
 ## If the location has the singificant contribution... text mining on reviews and tips
 ## If the location has the insingificant contribution... conclude the model from the attributes.
