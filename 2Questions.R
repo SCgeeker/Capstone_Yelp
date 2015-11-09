@@ -80,18 +80,9 @@ table(yelp_Chinese$Loc)
 with(data = yelp_Chinese, table(stars, Loc))
 chisq.test( table(yelp_Chinese$stars, yelp_Chinese$Loc) )
 
-## BBN Graphs
-### Fast Food
-yelp_FastFood.gs <- gs(yelp_FastFood[,c(3,2,4:43)])
-yelp_FastFood.hc <- hc(yelp_FastFood[,c(3,2,4:43)])
-plot(yelp_FastFood.gs,  main  =  "Constraint-based  algorithms",  highlight  =  c("stars",  "Loc"))
-plot(yelp_FastFood.hc,  main  =  "Hill-Climbing",  highlight  =  c("stars",  "Loc"))
+Variables_Tags <- names(yelp_FastFood)
 
-### Chinese
-yelp_Chinese.gs <- gs(yelp_Chinese[,c(3,2,4:43)])
-yelp_Chinese.hc <- hc(yelp_Chinese[,c(3,2,4:43)])
-plot(yelp_Chinese.gs,  main  =  "Constraint-based  algorithms",  highlight  =  c("stars",  "Loc"))
-plot(yelp_Chinese.hc,  main  =  "Hill-Climbing",  highlight  =  c("stars",  "Loc"))
+save.image("../Yelp_Data/Model.RData")
 
 ## If the location has the singificant contribution... text mining on reviews and tips
 ## If the location has the insingificant contribution... conclude the model from the attributes.

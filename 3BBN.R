@@ -1,3 +1,41 @@
+load("../Yelp_Data/Model.RData")
+
+## BBN Graphs
+### Fast Food
+#### Normal BBN plot
+names(yelp_FastFood) <- c("ID", "L", "S", "H", "R", "N", paste0("A",1:37))
+yelp_FastFood.gs <- gs(yelp_FastFood[,c(3,2,4:43)])
+yelp_FastFood.hc <- hc(yelp_FastFood[,c(3,2,4:43)])
+compare(yelp_FastFood.gs, yelp_FastFood.hc)
+plot(yelp_FastFood.gs,  main  =  "Constraint-based  algorithms",  highlight  =  c("S",  "L"))
+plot(yelp_FastFood.hc,  main  =  "Hill-Climbing",  highlight  =  c("S",  "L"))
+
+#### BBN Graphviz
+gs.opt <- list(nodes = c("S", "L"), arcs = c("S", "L"), col = "red", fill = "grey")
+graphviz.plot(yelp_FastFood.gs, highlight = gs.opt)
+hc.opt <- list(nodes = c("S", "L"), arcs = c("S", "L"), col = "red", fill = "grey")
+graphviz.plot(yelp_FastFood.hc, highlight = hc.opt)
+
+##### In the case of fast food, both "Constraint-based  algorithms" and "Hill-Climbing" plot the Location as the prior event of stars.
+##### Constraint-based algorithms pick the direct events to 'stars': 'review count', 'Outdoor.Seating'and 'dessert'. 'Loc' is the prior event of 'review count'
+
+##### "Loc" is the top node that directly influence "Accepts.Credit.Cards", "Good.For.Groups", "Price.Range", and "Good.for.Kids".
+
+### Chinese
+names(yelp_Chinese) <- c("ID", "L", "S", "H", "R", "N", paste0("A",1:37))
+yelp_Chinese.gs <- gs(yelp_Chinese[,c(3,2,4:43)])
+yelp_Chinese.hc <- hc(yelp_Chinese[,c(3,2,4:43)])
+plot(yelp_Chinese.gs,  main  =  "Chinese resturants: Constraint-based  algorithms",  highlight  =  c("stars",  "Loc"))
+plot(yelp_Chinese.hc,  main  =  "Chinese resturants: Hill-Climbing",  highlight  =  c("stars",  "Loc"))
+gs.opt <- list(nodes = c("stars", "Loc"), arcs = c("stars", "Loc"), col = "red", fill = "grey")
+graphviz.plot(yelp_Chinese.gs, highlight = gs.opt)
+hc.opt <- list(nodes = c("stars", "Loc"), arcs = c("stars", "Loc"), col = "red", fill = "grey")
+graphviz.plot(yelp_Chinese.hc, highlight = hc.opt)
+
+#####  "Loc" decide the hours of open of Chinese resturants. Hours of open directly influence "stars". "Loc" and "stars" decide the other attributes of Chinese resturants.
+
+
+
 
 ## Split the variables
 id <- names(yelp_FastFood)[1]

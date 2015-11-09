@@ -40,7 +40,25 @@ When we focus on the one category of business, such as Pizza or Chinese restaura
 sort( table(unlist(yelp_business$categories)) , decreasing = TRUE) [1:30]
 ```
 
+We pick up Fast Food and Chinese resturant as the cases.
+
+# Baysian Belief Network
+
+Modifications on the variables
+1. Delete the variables less than 50% observations
+2. Transfer all attribute vectors to numerics. 
+
+# Explore category data in BBN
+
 Fixed: categories
+
+## variables in analysis
 Primary: stars
 secondary: Loc(city),  neighbors(numbers), hours(types), open(T, F)
 Third: attributes(numbers, NA -> 0, 1 -> 2, 2 -> 3, etc.)
+
+## Summary after exploration
+Fast food in each city has a specific set of variables to influence the stars
+People evalute the Chinese resturants on a specific attributes rather than a score. Generally the attributes are "Outdoor.Seating" and "Has.TV".
+
+# Build prediction model for Fastfood in each city.
