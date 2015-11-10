@@ -80,7 +80,8 @@ table(yelp_Chinese$Loc)
 with(data = yelp_Chinese, table(stars, Loc))
 chisq.test( table(yelp_Chinese$stars, yelp_Chinese$Loc) )
 
-Variables_Tags <- names(yelp_FastFood)
+FastFood_Variables_Tags <- names(yelp_FastFood)
+Chinese_Variables_Tags <- names(yelp_Chinese)
 
 save.image("../Yelp_Data/Model.RData")
 

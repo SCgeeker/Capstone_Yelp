@@ -1,0 +1,21 @@
+---
+title: "Yelp Star is not Everything"
+author: "Sau-Chin Chen"
+output: pdf_document
+---
+```{r initial, cache.path="../Yelp_Data", cache=TRUE, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+load("../Yelp_Data/Raw.RData")
+source("./packageskit.R")
+source("./functions.R")
+yelp_business <- data.frame(yelp_business, Loc = City_Tag(yelp_business$latitude, yelp_business$longitude))
+```
+# Introduction
+Yelp has been collecting the users' review for the businesses from the major cities at North America and Europe since October 2004. This data set *business* collects the information from `r dim(yelp_business)[1]` businesses across 10 cities. Data set *checkin* stores `r dim(yelp_checkin)[1]` durations and frequencies a user stay in every business. Data set *review* sumarizes `r dim(yelp_review)[1]` reviews for a registed business. Data set *tip* summarizes the `r dim(yelp_tip)[1]` recommendations for a business. Data set *user* collects the information from  `r dim(yelp_user)[1]` registed users.
+
+# Method
+
+
+# Result
+
+
+# Discussion

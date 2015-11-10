@@ -22,6 +22,39 @@
 #  stateNames[indices]
 # }
 
+
+
+#Build_Cleaned_Docs <- function(text) {
+  ### Build Corpus
+#  docs <- Corpus(VectorSource(text))
+# summary(docs)
+  
+  ### Preprocessing docs
+#  docs <- tm_map(docs, removePunctuation)                  # Removing punctuation
+#  
+#  docs <- tm_map(docs, removeNumbers)                      # Removing numbers
+  
+#  docs <- tm_map(docs, tolower)                            # Converting to lowercase
+#  docs <- tm_map(docs, removeWords, stopwords("english"))  # Removing common words
+# Removing particular words: if necessary
+# docs <- tm_map(docs, stemDocument)  # Removing common word endings
+#  
+#  docs <- tm_map(docs, stripWhitespace)                    # Removing white spaces
+#  for(j in seq(docs))   
+#  {   
+#    docs[[j]] <- gsub("/", "", docs[[j]])   
+#    docs[[j]] <- gsub("@", "", docs[[j]])   
+#    docs[[j]] <- gsub("\\|", "", docs[[j]])   
+#    docs[[j]] <- gsub("^ ", "", docs[[j]])   
+#  }   
+#  
+#  
+#  docs <- tm_map(docs, PlainTextDocument)                  # tells R to treat your preprocessed documents as text documents.
+#
+#  return(docs)
+# }
+
+
 ## Cities(From west to east): Las Vegas, Phoenix, Madison, Urbana-Champaign, Charlotte, Waterloo, Pittsburgh, Montreal, Edinburgh, Karlsruhe
 ## (Lat, Lon): (36, -115), (33,-112), (43,-89), (40, -88), (35,-81), (43,-81), (40,-80), (45, -74), (56,-3), (49, 8)
 ## substraction within +/- 2 equals to that city!
@@ -123,7 +156,6 @@ City_Tag <- function(lat, lon){
     return(Tag)
 }
 
-
 Variables_Transfer <- function(DATA){
     ### Label open/close information in numeric variable
   tmp <- matrix(unlist( sapply( DATA$hours, as.vector) ), ncol =  7*2 )
@@ -183,56 +215,189 @@ Variables_Transfer <- function(DATA){
   return(DATA)
 }
 
+fit.the.model = function(data, alpha) {
+  
+  cpc = vector(length(names(data)), mode = "list")
+  names(cpc) = names(data)
+  
+  # find the parents of each trait (may be genes or other traits).
+  for (t in seq_along(names(data))) {
+    
+    # BLUP away the family structure. (We may be unable to do this in the yelp case)
+    # m = lmer(as.formula(paste(traits[t], "~ (1|FUNNEL:PLANT)")), data = data)
+    # data[!is.na(data[, traits[t]]), traits[t]] =
+    #    data[, traits[t]] - ranef(m)[[1]][paste(data$FUNNEL, data$PLANT, sep = ":"), 1]
+    
+    # find out the parents.
+    cpc[[t]] = learn.nbr(data[, names(data)], node = names(data)[t], debug = FALSE,
+                         method = "si.hiton.pc", test = "cor", alpha = alpha)
+    
+  }#FOR
+  
+  # merge the relevant variables to use for learning.
+  nodes = unique(c(names(data), unlist(cpc)))
+  # Every feature could be the child of the other feature. Option 'blcaklist' is unavailable.
+  # blacklist = tiers2blacklist(list(nodes[!(nodes %in% traits)],
+  #                                 traits[traits != "YLD"], "YLD"))
+  
+  
+  # build the Bayesian network.
+  # bn = hc(data[, nodes], blacklist = blacklist)
+  bn = hc(data[, nodes])
+  
+  return(bn)
+  
+}#FIT.THE.MODEL
 
+xval.the.model = function(data, k = 10, alpha, ridge) {
+  #cluster,  no need clusters
+  
+  n = nrow(data)
+  predcor = numeric(ncol(data))
+  names(predcor) = names(data)
+  postcor = numeric(ncol(data))
+  names(postcor) = names(data)
+  
+  # shuffle the data to get unbiased splits.
+  kcv = split(sample(n), seq_len(k))
+  # store the length of each test set.
+  kcv.length = sapply(kcv, length)
+  
+  predicted <- list()
+  
+  # There were the problems we were using parLapply. Replace with 'for' loop.
+  #predicted = parLapply(cl = cluster, kcv, function(test) 
+  
+  for(k in 1:length(kcv)) {
+    
+    test = kcv[[k]]
+    
+    # create a matrix to store the predicted values.
+    pred = matrix(0, nrow = length(test), ncol = ncol(data))
+    colnames(pred) = names(data)
+    # create a matrix to store posterior estimates.
+    post = matrix(0, nrow = length(test), ncol = ncol(data))
+    colnames(post) = names(data)
+    
+    cat("* beginning cross-validation fold.\n")
+    
+    # split training and test.
+    dtraining = data[-test, ]
+    dtest = data[test, ]
+    # fit the model on the training data.
+    model = fit.the.model(dtraining, alpha = alpha)
+    fitted = bn.fit(model, dtraining[, nodes(model)])
+    # maybe re-fit with ridge regression.
+    if (ridge) {
+      
+      library(penalized)
+      
+      for (no in nodes(fitted)) {
+        
+        node.parents = parents(fitted, no)
+        
+        if (length(node.parents) < 3)
+          next
+        
+        opt.lambda = optL2(response = dtraining[, no],
+                           penalized = dtraining[, node.parents],
+                           model = "linear", trace = FALSE,
+                           minlambda2 = 10e-5, maxlambda = 500)$lambda
+        fitted[[no]] = penalized(response = dtraining[, no],
+                                 penalized = dtraining[, node.parents],
+                                 model = "linear", trace = FALSE,
+                                 lambda1 = 0, lambda2 = opt.lambda)
+        
+      }#FOR
+      
+    }#THEN
+    # subset the test data.
+    dtest = dtest[, nodes(model)]
+    
+    cat("  model has", length(nodes(model)), "nodes.\n")
+    
+    # predict each trait in turn, given all the parents.
+    for (t in names(data))
+      pred[, t] = predict(fitted, node = t, data = dtest[, nodes(model)])
+    
+    for (i in seq(nrow(dtest)))
+      post[i, names(data)] = colMeans(cpdist(fitted, nodes = names(data),
+                                             evidence = as.list(dtest[i, names(dtest) %in% names(dtest)[-(1:4)] ]),
+                                             method = "lw", n = 1000))
+    
+    #return(list(model = fitted, pred = pred, post = post))
+    predicted[[length(predicted) + 1]] = list(model = fitted, pred = pred, post = post)
+    
+  } #)
+  
+  # merge all the predicted values.
+  posterior = do.call(rbind, lapply(predicted, `[[`, "post"))
+  causal = do.call(rbind, lapply(predicted, `[[`, "pred"))
+  
+  cat("* overall cross-validated correlations:\n")
+  for (t in names(data)) {
+    
+    predcor[t] = cor(causal[, t], data[unlist(kcv), t])
+    cat("  PREDCOR(", t, "):", predcor[t], "\n")
+    postcor[t] = cor(posterior[, t], data[unlist(kcv), t])
+    cat("  POSTCOR(", t, "):", postcor[t], "\n")
+    
+  }#FOR
+  
+  return(list(predicted = causal, posterior = posterior,
+              observed = data[unlist(kcv), t], predcor = predcor, postcor = postcor,
+              models = lapply(predicted, `[[`, "model")))
+  
+}#XVAL.THE.MODEL
 
-Build_Cleaned_Docs <- function(text) {
-  ### Build Corpus
-  docs <- Corpus(VectorSource(text))
-  # summary(docs)
- 
-  ### Preprocessing docs
-  docs <- tm_map(docs, removePunctuation)                  # Removing punctuation
+gather.arc = function(pr.list, nodes, Layout = 'fdp', Threshold = 0, enhanced = TRUE) {
+  # gather all the arc lists.
+  arclist = list()
   
-  docs <- tm_map(docs, removeNumbers)                      # Removing numbers
+  for (i in seq_along(pr.list)) {
+    
+    # extract the models.
+    run = pr.list[[i]]$models
+    
+    for (j in seq_along(run))
+      arclist[[length(arclist) + 1]] = arcs(run[[j]])
+    
+  }#FOR
   
-  docs <- tm_map(docs, tolower)                            # Converting to lowercase
-  docs <- tm_map(docs, removeWords, stopwords("english"))  # Removing common words
-  # Removing particular words: if necessary
-  # docs <- tm_map(docs, stemDocument)  # Removing common word endings
+  # compute the arc strengths.
+  nodes = unique(unlist(arclist))
+  strength = custom.strength(arclist, nodes = nodes)
+  # estimate the threshold and average the networks.
+  averaged = averaged.network(strength)
   
-  docs <- tm_map(docs, stripWhitespace)                    # Removing white spaces
-  for(j in seq(docs))   
-  {   
-    docs[[j]] <- gsub("/", "", docs[[j]])   
-    docs[[j]] <- gsub("@", "", docs[[j]])   
-    docs[[j]] <- gsub("\\|", "", docs[[j]])   
-    docs[[j]] <- gsub("^ ", "", docs[[j]])   
-  }   
+  # subset the network to remove isolated nodes.
+  # Threshold decide how much strength will be drew on the plot
+  relevant.nodes = nodes(averaged)[sapply(nodes, degree, object = averaged) > Threshold]
+  averaged2 = subgraph(averaged, relevant.nodes)
+  strength2 = strength[(strength$from %in% relevant.nodes) &
+                         (strength$to %in% relevant.nodes), ]
+  # Set the parameter "Layout" to decide which plot we want to draw
+  gR = strength.plot(averaged2, strength2, shape = "rectangle", layout = Layout)
   
+  ## From http://stackoverflow.com/questions/18023300/is-rgraphviz-no-longer-available-for-r
+  ## You need to install it directly from the bioconductors site.
+  ## source("http://bioconductor.org/biocLite.R")
+  ## biocLite("Rgraphviz")  
   
-  docs <- tm_map(docs, PlainTextDocument)                  # tells R to treat your preprocessed documents as text documents.
+  ## If we want to see the enhanced version, set parameter 'enhanced' TRUE
+  if(enhanced == TRUE){
+    require("Rgraphviz")
+    nodeRenderInfo(gR)$fill = "lightblue"
+    nodeRenderInfo(gR)$fill = "lightblue"
+    nodeRenderInfo(gR)$col = "darkblue"
+    nodeRenderInfo(gR)$fill[nodes] = "limegreen"
+    nodeRenderInfo(gR)$col[nodes] = "darkgreen"
+    a = arcs(subgraph(averaged, nodes))
+    a = as.character(interaction(a[, "from"], a[, "to"], sep = "~"))
+    edgeRenderInfo(gR)$col = "grey"
+    edgeRenderInfo(gR)$col[a] = "limegreen"
+    renderGraph(gR)
+  }
   
-  return(docs)
-}
-
-# Make_Som_Model <- function(df, city, x, y) {
-#   if( (city %in% c("Charlotte","Edinburgh","Karlsruhe","Las Vegas","Madison",
-#       "Montreal","Phoenix","Pittsburgh","Urbana-Champaign","Waterloo") ) == TRUE ){
-#     require(kohonen)
-#     tmp <- df[df$Loc == city,]$attributes + 1
-#     tmp <- replace(tmp, is.na(tmp), 0)
-#     data_train <- data.frame(df[df$Loc == city, c(4, 5, 6)], tmp)
-#     rm(tmp)
-#     data_train_matrix <- as.matrix(scale(data_train))  # remove the NA values in the data
-#     som_grid <- somgrid(xdim = x, ydim= y, topo="hexagonal")
-#     som_model <- som(data_train_matrix, 
-#                      grid=som_grid, 
-#                      rlen=100, 
-#                      alpha=c(0.05,0.01), 
-#                      keep.data = TRUE,
-#                      n.hood='circular' )
-#   
-#   }
-#   return(som_model)
-# }
-
+  return(gR)
+}#GATHER.ARC
