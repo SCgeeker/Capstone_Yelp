@@ -22,6 +22,7 @@ if(!require(lubridate)){install.packages('lubridate')}
 
 if(!require(dplyr)){install.packages('dplyr')}
 
+if(!require(xtable)){install.packages('xtable')}
 # if(!require(sp)){install.packages('sp')}
 # library(sp)
 
