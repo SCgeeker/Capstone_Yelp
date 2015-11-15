@@ -10,12 +10,24 @@ source("./functions.R")
 yelp_business <- data.frame(yelp_business, Loc = City_Tag(yelp_business$latitude, yelp_business$longitude))
 ```
 # Introduction
-Yelp has been collecting the users' review for the businesses from the major cities at North America and Europe since October 2004. This data set *business* collects the information from `r dim(yelp_business)[1]` businesses across 10 cities. Data set *checkin* stores `r dim(yelp_checkin)[1]` durations and frequencies a user stay in every business. Data set *review* sumarizes `r dim(yelp_review)[1]` reviews for a registed business. Data set *tip* summarizes the `r dim(yelp_tip)[1]` recommendations for a business. Data set *user* collects the information from  `r dim(yelp_user)[1]` registed users.
+Yelp has been collecting the users' review for the businesses from the major cities at North America and Europe since October 2004. This data set *business* collects the information from `r dim(yelp_business)[1]` businesses across 10 cities. Data set *checkin* stores `r dim(yelp_checkin)[1]` durations and frequencies a user stay in every business. Data set *review* sumarizes `r dim(yelp_review)[1]` reviews for a registed business. Data set *tip* summarizes the `r dim(yelp_tip)[1]` recommendations for a business. Data set *user* collects the information from  `r dim(yelp_user)[1]` registed users.  
+
+[Yelp's recommandation engine][1] has been designed to filter the active and available review articles for a business. A couple of attributes were summarized from the data accumulated in the past decade. The data set *business* has `r dim(yelp_business$attributes)[2]` variables in which `r length( sapply(yelp_business$attributes, is.data.frame)[sapply(yelp_business$attributes, is.data.frame) %in% TRUE] )` variables are data frame. If these variables constituent the evaluation model how yelp users evaluate a local businesses, will we figure, for a category of business, a global standard across cities or many local standards in each city?  In use of [Bayesian network][2], we set up the criterion to answer this question. When the Bayesian network showed that the city is not the child node of any variable, there is no a unified model for all the businesses of a category across cities. Ohterwise, there is a unified model to tell people how to evaluate a kind of business based on yelp stars or a specific attribute.
+
+
 
 # Method
+## Preprocessing Data
 
+## Exprolary Analysis
+
+## Build Model(s)
 
 # Result
 
 
 # Discussion
+
+
+[1]: http://officialblog.yelp.com/2013/11/yelp-recommended-reviews.html "How Yelp Helps You Find the Right Local Business"
+[2]: https://en.wikipedia.org/wiki/Bayesian_network "Wikipedia: Bayesian network"

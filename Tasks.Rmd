@@ -3,7 +3,7 @@ title: 'Capstone: Yelp Data Analysis'
 author: "Sau-Chin Chen"
 output: html_document
 ---
-```{r initial, cache.path="../Yelp_Data", cache=TRUE, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r initial, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 load("../Yelp_Data/Raw.RData")
 source("./packageskit.R")
 source("./functions.R")
@@ -14,7 +14,7 @@ yelp_business <- data.frame(yelp_business, Loc = City_Tag(yelp_business$latitude
 
 This project will analyze the data set from [Yelp Dataset Challenge](http://www.yelp.com/dataset_challenge). The data set is downloaded from [this link](https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/yelp_dataset_challenge_academic_dataset.zip). I obtained and pre-processed the data set through the codes in [0GetData.R](0GetData.R). Here are files compressed in the zip file:
 
-```{r overview, cache.path="../Yelp_Data", cache=TRUE, echo=FALSE, warning=FALSE}
+```{r overview, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE}
 print(unzip("../Yelp_Data/yelp.zip", list = TRUE))
 ```
 
@@ -37,7 +37,7 @@ yelp_business <- data.frame(yelp_business, Loc = City_Tag(yelp_business$latitude
 ## Decide the categories for this project
 When we focus on the one category of business, such as Pizza or Chinese restaurants, we could compute the relations of attributes and stars of businesses. At first, We calcuated how many categories are collected in the data set and how many businesses are labeled in every category. Here are the top 30 categories. We find out some comparable categories in this list. For example, "Fast Food" and "Pizza"; "Chinese" and "Italian".
 
-```{r categories, cache.path="../Yelp_Data", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r categories, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 sort( table(unlist(yelp_business$categories)) , decreasing = TRUE) [1:30]
 ```
 
@@ -47,7 +47,7 @@ We pick up Fast Food and Chinese resturant as the cases.
 1. Delete the variables captured less than 10% observations
 2. Transfer all attribute vectors to numerics
 3. Tag variable names with simple characters
-```{r modify_variables, cache.path="../Yelp_Data", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r modify_variables, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 FoodCategories <- names( sort( table(unlist(yelp_business$categories)) , decreasing = TRUE) )[c(13,14,15,18,19,21,22,23,24,25)]
 
 yelp_FastFood <- yelp_business[grep(gsub("[()]","",FoodCategories )[1], gsub("[()]","",yelp_business$categories) ),c("business_id","Loc","stars","hours", "review_count", "neighborhoods", "attributes")]
@@ -77,7 +77,7 @@ Third: attributes(numbers, NA -> 0, 1 -> 2, 2 -> 3, etc.)
 Fast food in each city has a specific set of variables to influence the stars
 People evalute the Chinese resturants on a specific attributes rather than a score. Generally the attributes are "Outdoor.Seating" and "Has.TV".
 
-```{r FastFood_hc, cache.path="../Yelp_Data", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+```{r FastFood_hc, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 names(yelp_FastFood) <- c("ID", "L", "S", "H", "R", "N", paste0("A",1:37))
 yelp_FastFood.hc <- hc(yelp_FastFood[,c(3,2,4:43)])
 hc.opt <- list(nodes = c("S", "L"), arcs = c("S", "L"), col = "red", fill = "grey")
@@ -91,7 +91,7 @@ dev.off()
 "Loc" decide the hours of open of Chinese resturants. Hours of open directly influence "stars". "Loc" and "stars" decide the other attributes of Chinese resturants.  
 "Outdoor.Seating" and "Has.TV" are the notes without children.
 
-```{r Chinese_hc, cache.path="../Yelp_Data", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+```{r Chinese_hc, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 names(yelp_Chinese) <- c("ID", "L", "S", "H", "R", "N", paste0("A",1:37))
 yelp_Chinese.hc <- hc(yelp_Chinese[,c(3,2,4:43)])
 hc.opt <- list(nodes = c("S", "L"), arcs = c("S", "L"), col = "red", fill = "grey")
@@ -104,7 +104,9 @@ dev.off()
 We decide to build and analyze the evaluation models of fast food resturants and Chinese resturants in Phoenix and Charlotte. There are `r table(yelp_FastFood$L)["Phoenix"]` fast food resturants in Phoenix and `r table(yelp_FastFood$L)["Charlotte"]`fast food resturants in Charlotte, and there are `r table(yelp_Chinese$L)["Phoenix"]` fast food resturants in Phoenix and `r table(yelp_Chinese$L)["Charlotte"]`fast food resturants in Charlotte. The method to build the evaluation models are cited from *bnlearn* development team's [blog article]( http://www.bnlearn.com/research/genetics14/)
 
 # Build evaluation model for fast food in Phoenix
-```{r Ph_FF_Model, cache.path="../Yelp_Data", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+
+We set alpha = 0 because some attributes had to dependend on the other attributes.
+```{r Ph_FF_Model, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 Phoenix_FastFood = subset(yelp_FastFood, L == "Phoenix")[,3:43]
 FastFood001 = vector(10, mode = "list")
 
@@ -118,13 +120,91 @@ dev.off()
 ```
 ![FastFood001](FastFood001.png)
 
+The final nodes are `r c(FastFood_Variables_Tags[6+20], FastFood_Variables_Tags[6+22], FastFood_Variables_Tags[6+30], FastFood_Variables_Tags[6+31], FastFood_Variables_Tags[6+34])`.
 
 # Build evaluation model for fast food in Charlotte
+```{r Ch_FF_Model, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+Charlotte_FastFood = subset(yelp_FastFood, L == "Charlotte")[,3:43]
+FastFood002 = vector(10, mode = "list")
 
+for (i in 1:10)
+  FastFood002[[i]] = xval.the.model(Charlotte_FastFood, alpha = 0, ridge = FALSE)
 
+png("FastFood002.png", width = 960, height = 960)
+FastFood002.gr <- gather.arc(FastFood002, names(Charlotte_FastFood), "dot", 0.01, enhanced = FALSE)
+dev.off()
+```
+![FastFood002](FastFood002.png)
 
 # Build evaluation model for Chinese resturants in Phoenix
+```{r Ph_CH_Model, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+Phoenix_Chinese = subset(yelp_Chinese, L == "Phoenix")[,3:43]
+Chinese001 = vector(10, mode = "list")
 
+for (i in 1:10)
+  Chinese001[[i]] = xval.the.model(Phoenix_Chinese, alpha = 0, ridge = FALSE)
 
+pred.Chinese001.summary = sapply(Chinese001, `[[`, "predcor")
+print(rowMeans(pred.Chinese001.summary))
+
+post.Chinese001.summary = sapply(Chinese001, `[[`, "postcor")
+print(rowMeans(post.Chinese001.summary))
+
+png("Chinese001.png", width = 960, height = 960)
+Chinese001.gr <- gather.arc(Chinese001, names(Phoenix_Chinese), 'dot', 0.01, enhanced = FALSE)
+dev.off()
+```
+![Chinese001](Chinese001.png)
+
+The final notes are
 
 # Build evaluation model for Chinese resturants in Charlotte
+```{r Ch_CH_Model, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+Charlotte_Chinese = subset(yelp_Chinese, L == "Charlotte")[,3:43]
+Chinese002 = vector(10, mode = "list")
+
+for (i in 1:10)
+  Chinese002[[i]] = xval.the.model(Charlotte_Chinese, alpha = 0, ridge = FALSE)
+
+pred.Chinese002.summary = sapply(Chinese002, `[[`, "predcor")
+print(rowMeans(pred.Chinese002.summary))
+
+post.Chinese002.summary = sapply(Chinese002, `[[`, "postcor")
+print(rowMeans(post.Chinese002.summary))
+
+png("Chinese002.png", width = 960, height = 960)
+Chinese002.gr <- gather.arc(Chinese002, names(Charlotte_Chinese), 'dot', 0.01, enhanced = FALSE)
+dev.off()
+```
+![Chinese002](Chinese002.png)
+
+ the average predictive correlations by extracting the values  from the 10 runs of cross-validation
+ 
+```{r BBN_brief, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results="asis"}
+pred.FastFood001.summary = sapply(FastFood001, `[[`, "predcor")
+
+post.FastFood001.summary = sapply(FastFood001, `[[`, "postcor")
+
+pred.FastFood002.summary = sapply(FastFood002, `[[`, "predcor")
+
+post.FastFood002.summary = sapply(FastFood002, `[[`, "postcor")
+
+pred.Chinese001.summary = sapply(Chinese001, `[[`, "predcor")
+
+post.Chinese001.summary = sapply(Chinese001, `[[`, "postcor")
+
+pred.Chinese002.summary = sapply(Chinese002, `[[`, "predcor")
+
+post.Chinese002.summary = sapply(Chinese002, `[[`, "postcor")
+
+library(xtable)
+Brief.tb <- xtable( cbind(pred = rowMeans(pred.FastFood001.summary), post = rowMeans(post.FastFood001.summary),
+                          pred = rowMeans(pred.FastFood002.summary), post = rowMeans(post.FastFood002.summary),
+                          pred = rowMeans(pred.Chinese001.summary), post = rowMeans(post.Chinese001.summary),
+                          pred = rowMeans(pred.Chinese002.summary), post = rowMeans(post.Chinese002.summary) ) )
+addtorow <- list()
+addtorow$pos <- list(0, 0)
+addtorow$command <- c("& \\multicolumn{2}{c}{Phoenix} & \\multicolumn{2}{c}{Charlotte} & \\multicolumn{2}{c}{Phoenix} & \\multicolumn{2}{c}{Charlotte} \\","")
+
+print(Brief.tb, add.to.row = addtorow, type = "html")
+```
