@@ -165,7 +165,7 @@ These facts will be benefitial to these readers:
 3. **Yelp software engineers:** The enginners could create the apps for the local services. The apps connect Yelp's recommandation engine and filter the review articles and tips that mention the key words to evluate a category of businesses in a city. To make the apps dominate the least evaluation criterions, the engineers are able to adjust the variables and attributes at the server according to the last analysis of Bayesian network.
 
 # Acknowledge
-Readers could check the full size graphical models in our [rough report](Tasks.html).
+Readers could check the full size graphical models in our [rough report](http://scgeeker.github.io/Capstone_Yelp/Tasks.html).
 
 [1]: https://class.coursera.org/dsscapstone-005
 [2]: http://officialblog.yelp.com/2013/11/yelp-recommended-reviews.html "How Yelp Helps You Find the Right Local Business"
