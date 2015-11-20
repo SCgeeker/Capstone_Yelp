@@ -350,7 +350,7 @@ xval.the.model = function(data, k = 10, alpha, ridge) {
   
 }#XVAL.THE.MODEL
 
-gather.arc = function(pr.list, nodes, Layout = 'fdp', Threshold = 0, enhanced = TRUE) {
+gather.arc = function(pr.list, nodes, Layout = 'fdp', Threshold = 0, enhanced = TRUE, sub = 'A') {
   # gather all the arc lists.
   arclist = list()
   
@@ -377,7 +377,7 @@ gather.arc = function(pr.list, nodes, Layout = 'fdp', Threshold = 0, enhanced = 
   strength2 = strength[(strength$from %in% relevant.nodes) &
                          (strength$to %in% relevant.nodes), ]
   # Set the parameter "Layout" to decide which plot we want to draw
-  gR = strength.plot(averaged2, strength2, shape = "rectangle", layout = Layout)
+  gR = strength.plot(averaged2, strength2, shape = "rectangle", layout = Layout, sub = 'A')
   
   ## From http://stackoverflow.com/questions/18023300/is-rgraphviz-no-longer-available-for-r
   ## You need to install it directly from the bioconductors site.

@@ -115,11 +115,12 @@ for (i in 1:10)
 # stopCluster(cl)
 
 png("FastFood001.png", width = 960, height = 960)
-FastFood001.gr <- gather.arc(FastFood001, names(Phoenix_FastFood), "dot", 0.01, enhanced = FALSE)
+FastFood001.gr <- gather.arc(FastFood001, names(Phoenix_FastFood), "dot", 0.01, enhanced = FALSE, sub = 'A')
 dev.off()
 ```
 ![FastFood001](FastFood001.png)
 
+The start is `r FastFood_Variables_Tags[6+9]`.
 The final nodes are `r c(FastFood_Variables_Tags[6+20], FastFood_Variables_Tags[6+22], FastFood_Variables_Tags[6+30], FastFood_Variables_Tags[6+31], FastFood_Variables_Tags[6+34])`.
 
 # Build evaluation model for fast food in Charlotte
@@ -131,10 +132,13 @@ for (i in 1:10)
   FastFood002[[i]] = xval.the.model(Charlotte_FastFood, alpha = 0, ridge = FALSE)
 
 png("FastFood002.png", width = 960, height = 960)
-FastFood002.gr <- gather.arc(FastFood002, names(Charlotte_FastFood), "dot", 0.01, enhanced = FALSE)
+FastFood002.gr <- gather.arc(FastFood002, names(Charlotte_FastFood), "dot", 0.01, enhanced = FALSE, sub = 'B')
 dev.off()
 ```
 ![FastFood002](FastFood002.png)
+
+The start is `r FastFood_Variables_Tags[6+10]`.
+The final nodes are `r c('stars', FastFood_Variables_Tags[6+7], FastFood_Variables_Tags[6+17], FastFood_Variables_Tags[6+22], FastFood_Variables_Tags[6+30], FastFood_Variables_Tags[6+31], FastFood_Variables_Tags[6+33], FastFood_Variables_Tags[6+34], FastFood_Variables_Tags[6+35])`.
 
 # Build evaluation model for Chinese resturants in Phoenix
 ```{r Ph_CH_Model, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
@@ -144,19 +148,14 @@ Chinese001 = vector(10, mode = "list")
 for (i in 1:10)
   Chinese001[[i]] = xval.the.model(Phoenix_Chinese, alpha = 0, ridge = FALSE)
 
-pred.Chinese001.summary = sapply(Chinese001, `[[`, "predcor")
-print(rowMeans(pred.Chinese001.summary))
-
-post.Chinese001.summary = sapply(Chinese001, `[[`, "postcor")
-print(rowMeans(post.Chinese001.summary))
-
 png("Chinese001.png", width = 960, height = 960)
-Chinese001.gr <- gather.arc(Chinese001, names(Phoenix_Chinese), 'dot', 0.01, enhanced = FALSE)
+Chinese001.gr <- gather.arc(Chinese001, names(Phoenix_Chinese), 'dot', 0.01, enhanced = FALSE, sub = 'C')
 dev.off()
 ```
 ![Chinese001](Chinese001.png)
 
-The final notes are
+The start is `r FastFood_Variables_Tags[6+3]`.
+The final notes are  `r c(FastFood_Variables_Tags[6+16], FastFood_Variables_Tags[6+34])`
 
 # Build evaluation model for Chinese resturants in Charlotte
 ```{r Ch_CH_Model, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
@@ -166,17 +165,16 @@ Chinese002 = vector(10, mode = "list")
 for (i in 1:10)
   Chinese002[[i]] = xval.the.model(Charlotte_Chinese, alpha = 0, ridge = FALSE)
 
-pred.Chinese002.summary = sapply(Chinese002, `[[`, "predcor")
-print(rowMeans(pred.Chinese002.summary))
-
-post.Chinese002.summary = sapply(Chinese002, `[[`, "postcor")
-print(rowMeans(post.Chinese002.summary))
-
 png("Chinese002.png", width = 960, height = 960)
-Chinese002.gr <- gather.arc(Chinese002, names(Charlotte_Chinese), 'dot', 0.01, enhanced = FALSE)
+Chinese002.gr <- gather.arc(Chinese002, names(Charlotte_Chinese), 'dot', 0.01, enhanced = FALSE, sub = 'D')
 dev.off()
 ```
 ![Chinese002](Chinese002.png)
+
+
+The start are "Number of neighborhoods" and `r Chinese_Variables_Tags[6+1]`.
+The final notes are  `r c(Chinese_Variables_Tags[6+10], Chinese_Variables_Tags[6+12], Chinese_Variables_Tags[6+25], Chinese_Variables_Tags[6+26], Chinese_Variables_Tags[6+27],Chinese_Variables_Tags[6+28], Chinese_Variables_Tags[6+30], Chinese_Variables_Tags[6+31], Chinese_Variables_Tags[6+32], Chinese_Variables_Tags[6+34], Chinese_Variables_Tags[6+36])`
+
 
  the average predictive correlations by extracting the values  from the 10 runs of cross-validation
  
@@ -198,10 +196,14 @@ pred.Chinese002.summary = sapply(Chinese002, `[[`, "predcor")
 post.Chinese002.summary = sapply(Chinese002, `[[`, "postcor")
 
 library(xtable)
-Brief.tb <- xtable( cbind(pred = rowMeans(pred.FastFood001.summary), post = rowMeans(post.FastFood001.summary),
-                          pred = rowMeans(pred.FastFood002.summary), post = rowMeans(post.FastFood002.summary),
-                          pred = rowMeans(pred.Chinese001.summary), post = rowMeans(post.Chinese001.summary),
-                          pred = rowMeans(pred.Chinese002.summary), post = rowMeans(post.Chinese002.summary) ) )
+Brief.tb <- xtable( cbind(pred = c(rowMeans(pred.FastFood001.summary)[1:4],A = mean(rowMeans(pred.FastFood001.summary)[5:41]) ), 
+                          post = c(rowMeans(post.FastFood001.summary)[1:4],A = mean(rowMeans(post.FastFood001.summary)[5:41]) ),
+                          pred = c(rowMeans(pred.FastFood002.summary)[1:4],A = mean(rowMeans(pred.FastFood002.summary)[5:41]) ), 
+                          post = c(rowMeans(post.FastFood002.summary)[1:4],A = mean(rowMeans(post.FastFood002.summary)[5:41]) ),
+                          pred = c(rowMeans(pred.Chinese001.summary)[1:4], A = mean(rowMeans(pred.Chinese001.summary)[5:41]) ),
+                          post = c(rowMeans(post.Chinese001.summary)[1:4], A = mean(rowMeans(post.Chinese001.summary)[5:41]) ),
+                          pred = c(rowMeans(pred.Chinese002.summary)[1:4], A = mean(rowMeans(pred.Chinese002.summary)[5:41]) ),
+                          post = c(rowMeans(post.Chinese002.summary)[1:4], A = mean(rowMeans(post.Chinese002.summary)[5:41]) ) ) )
 addtorow <- list()
 addtorow$pos <- list(0, 0)
 addtorow$command <- c("& \\multicolumn{2}{c}{Phoenix} & \\multicolumn{2}{c}{Charlotte} & \\multicolumn{2}{c}{Phoenix} & \\multicolumn{2}{c}{Charlotte} \\","")

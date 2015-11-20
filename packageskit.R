@@ -22,6 +22,7 @@ if(!require(lubridate)){install.packages('lubridate')}
 
 if(!require(dplyr)){install.packages('dplyr')}
 
+if(!require(stargazer)){install.packages('stargazer')}
 if(!require(xtable)){install.packages('xtable')}
 # if(!require(sp)){install.packages('sp')}
 # library(sp)
@@ -46,7 +47,6 @@ if(!require("Rgraphviz")){
   biocLite("Rgraphviz")
 }
 
-
 library("devtools")
 #library("tm")
 library("ggplot2")
@@ -57,3 +57,4 @@ library("dplyr")
 library("bnlearn")
 library("parallel")
 library("Rgraphviz")
+library("stargazer")
