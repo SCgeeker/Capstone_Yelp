@@ -1,0 +1,173 @@
+---
+title: "Yelp Star is not Everything"
+author: "Sau-Chin Chen"
+output: pdf_document
+---
+```{r initial, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+load("../Yelp_Data/Raw.RData")
+source("packageskit.R")
+source("functions.R")
+yelp_business <- data.frame(yelp_business, Loc = City_Tag(yelp_business$latitude, yelp_business$longitude))
+```
+# Introduction: 
+Yelp has been collecting the users' review for the businesses in the major cities across North America and Europe since October 2004. Based on 5 data set summarized by [Data Science Capstone][1], this project will explore and analyze why a kind of business has reputation in a city. Data set *business* collects the information from `r dim(yelp_business)[1]` businesses across 10 cities. Data set *checkin* stores `r dim(yelp_checkin)[1]` durations and frequencies a user stay in every business. Data set *review* sumarizes `r dim(yelp_review)[1]` reviews for a registed business. Data set *tip* summarizes the `r dim(yelp_tip)[1]` recommendations for a business. Data set *user* collects the information from  `r dim(yelp_user)[1]` registed users.  
+
+[Yelp's recommandation engine][2] has been designed to filter the active and available review articles for a business. A couple of attributes have been summarized from the data accumulated in the past decade. The data set *business* contains `r dim(yelp_business$attributes)[2]` variables including `r length( sapply(yelp_business$attributes, is.data.frame)[sapply(yelp_business$attributes, is.data.frame) %in% TRUE] )` variables as the sets of minor attributes. If these attributes constituent the evaluation model how the yelp users evaluate a local businesses, will we figure, for a category of business, a global standard across cities or many local standards in each city?  In use of [Bayesian network][3], we set up the criterion to answer this question: When the Bayesian network showed that the city is not the child node of any variable, there is no a unified model for all the businesses of a category across cities. Ohterwise, there is a unified model to tell people how to evaluate a kind of business based on yelp stars or a specific attribute.
+
+Yelp stars is the users' average responeses and is assumed as the index of overall quality for a business. If there is a global evluation model for a kind of business, the stars should be the last considered variable after considered the other atrributes. Based on this working hypothesis, we ploted the explorary analsis on the fast foods and the Chinese restaurants across ten cities. We fcosued on the two categories because they have thousands of data in some cities and the difference between the two categories. Most fast foods are the chained resturants across countries, and many Chinese resturants are managed in a location. The explorary analysis indicated that the yelp stars is the last variable in the network for the fast foods but not for the Chinese resturants. Finally we picked up the fast foods and the Chinese resturants in Phoenix and Charlotte and built the local evaluation models.
+
+# Method
+## Preprocessing Data
+Although each bussines in *business* data set has the information of location (full_address, city, state), these variables are a mass because of users' typo. We used the geographical information (longitude, latitude) to identify the location of each business. The result is that we added the new variable 'Loc' to *business* data set. Table 1 lists the number of businesses in every city.  
+
+Table 1. Number of businesses in ten cities
+```{r Preprocessing, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, results='asis', warning=FALSE, message=FALSE}
+require(xtable)
+options(xtable.comment = FALSE)
+tb <- xtable( t( table(yelp_business$Loc) ) )
+print.xtable(tb, include.rownames = FALSE, size="small")
+```
+We calcuated how many categories are collected in *business* data set and how many businesses are labeled in every category. There are 2,383 fast foods and 1496 Chinese resturants for the explorary analysis. Before run the explorary analysis, we processed the attribute vectors in the following 3 steps: (1) Delete the attributes conied in less than 10% of businesses; (2) Transfer the rest of attribute vectors to numerics; (3) Tag attribute names with simple characters(A1 to A37). In the explorary analysis, the target data sets included 37 attributes and the five variables, stars(S), locations(L), open hours(H), review counts(R), and, number of neighborhoods(N).  
+
+## Briefing Bayesian network
+Bayesian network is a probabilistic graphical model that illustrates a set of random variables and their conditional dependencies via a directed acyclic graph (DAG). Take [the example in the wikipedia of Bayesian network][3], 'Grass wet' could depend on 'Rain' and 'Sprinker', and 'Sprinkler' could depend on 'Rain'. The data of every variable have to be the same class, such as Boolean, characters, or numeric. An algorithm of Bayesian network will conduct the conditional dependence tables of every set of variables and decide the highly fitted graphical model for the variables. The arrows in the graph represent that conditional dependence of two variable. In the example of wikipedia, the data of 'Grass wet' depend on 'Rain' and 'Spinkler'  and the data of 'Spinkler' depend on 'Rain'. The grapical model is illustrated in Figure 1.  
+![Figure1](https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/SimpleBayesNetNodes.svg/200px-SimpleBayesNetNodes.svg.png)  
+Figure 1. Graphical models of 'Grass wet', 'Rain', and 'Sprinker'
+
+## Explorary Analysis
+We used hill-climbing(HC) as the algorithm to build the Bayesian network of variables for the data of fast food and Chinese resurants across ten cites. The grapical models were drew by the R package *bnlearn*. The targeted variables are stars(S) and Locations(L). If L is on the top of the network and S is at the bottom of the network, we would obtain a graphical model matched our hypothesis for a category of business.  
+
+## Build Evaluation Models
+To have a validation test on the evaluation model for every case, we adpoted the method in [Multiple Quantitative Trait Analysis Using Bayesian Networks][4]. In addition to Locations(L), the rest of four variables and 37 attributes entered the establishment of evaluation models. Based on the explorary analysis of the data from ten cities, we decide build the evluation models for the fast food in Phoenix and Charlotte and for the Chinese resturants in Phoenix and Charlotte.  
+The final evaluation model for each set of data is the averaged result of the 100 models conducted in 10 rounds of cross-validation processes. Every final evaluation model will pick up the a set of attributes as the top and bottom nodes. The evaluation of the final models depends on the predictive correlations and post correlations of the four variables: stars(S), open hours(H), review counts(R), and, number of neighborhoods(N). 
+If these variables had lower poster correlations than the predicitve correlations, and the averaged post correlations of attributes reach one, the final model will represent the evluation process for a kind of business in that city.
+```{r modify_variables, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+FoodCategories <- names( sort( table(unlist(yelp_business$categories)) , decreasing = TRUE) )[c(13,14,15,18,19,21,22,23,24,25)]
+
+yelp_FastFood <- yelp_business[grep(gsub("[()]","",FoodCategories )[1], gsub("[()]","",yelp_business$categories) ),c("business_id","Loc","stars","hours", "review_count", "neighborhoods", "attributes")]
+yelp_FastFood <- Variables_Transfer(yelp_FastFood)
+FastFood_Variables_Tags <- names(yelp_FastFood)
+
+yelp_Chinese <- yelp_business[grep(gsub("[()]","",FoodCategories )[8], gsub("[()]","",yelp_business$categories) ),c("business_id","Loc","stars","hours", "review_count", "neighborhoods", "attributes")]
+yelp_Chinese <- Variables_Transfer(yelp_Chinese)
+Chinese_Variables_Tags <- names(yelp_Chinese)
+```
+# Result
+## Explorary: Fast Food and Chinese Resturants
+The graphical model of the fast foods across the 10 cities (Figure 2A) showed the locations(L) at the top and the stars(S) at the bottom. This meant that fast foods in each city has a specific set of variables to influence the stars. For the fast foods over the countres, the stars is a recommended dimenstion to understand the difference between fast food resturants.
+The graphical model of the Chinese resturants acrss the 10 cities(Figure 2B) showed the other attributes prior to the locations or stars. People evalute the Chinese resturants on a specific attributes rather than a score, such as a resturant has outdoor seats or TV in the resturant. 
+
+```{r FastFood_hc, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+names(yelp_FastFood) <- c("ID", "L", "S", "H", "R", "N", paste0("A",1:37))
+yelp_FastFood.hc <- hc(yelp_FastFood[,c(3,2,4:43)])
+hc.opt <- list(nodes = c("S", "L"), arcs = c("S", "L"), col = "red", fill = "grey")
+png("fastfood_explore240x.png", width = 240, height = 240)
+graphviz.plot(yelp_FastFood.hc, highlight = hc.opt, sub = 'A')
+dev.off()
+```
+```{r Chinese_hc, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+names(yelp_Chinese) <- c("ID", "L", "S", "H", "R", "N", paste0("A",1:37))
+yelp_Chinese.hc <- hc(yelp_Chinese[,c(3,2,4:43)])
+hc.opt <- list(nodes = c("S", "L"), arcs = c("S", "L"), col = "red", fill = "grey")
+png("Chinese_explore240x.png", width = 240, height = 240)
+graphviz.plot(yelp_Chinese.hc, highlight = hc.opt, sub = 'B')
+dev.off()
+```
+![Figure2A](fastfood_explore240x.png#center)  
+![Figure2B](Chinese_explore240x.png#center)  
+Figure 2. Explorary model for (A) Fast Food (B) Chinese Resturants.  
+
+## Evaluation Models for Local Businesses
+Becuase some attributes had to dependend on the other attributes, we set alpha = 0 for every cross validation process. Every evaluation model shows a variety of evaluation process for the fast foods and the Chinese resturants in Phoenix and in Charlotte. Because the area of every graphical models cover half of a page, readers are able to access the figures based on these links: (A)[Phoenix, Fast Food](FastFood001.png), (B)(FastFood002.png), (C)[Phoenix, Chinese resturants](Chinese001.png), (D)[Charlotte, Chinese resturants](Chinese002.png). Table 2 lists the start and end nodes of each model.
+```{r Models, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+Phoenix_FastFood = subset(yelp_FastFood, L == "Phoenix")[,3:43]
+FastFood001 = vector(10, mode = "list")
+
+for (i in 1:10)
+  FastFood001[[i]] = xval.the.model(Phoenix_FastFood, alpha = 0, ridge = FALSE)
+
+Charlotte_FastFood = subset(yelp_FastFood, L == "Charlotte")[,3:43]
+FastFood002 = vector(10, mode = "list")
+
+for (i in 1:10)
+  FastFood002[[i]] = xval.the.model(Charlotte_FastFood, alpha = 0, ridge = FALSE)
+
+Phoenix_Chinese = subset(yelp_Chinese, L == "Phoenix")[,3:43]
+Chinese001 = vector(10, mode = "list")
+
+for (i in 1:10)
+  Chinese001[[i]] = xval.the.model(Phoenix_Chinese, alpha = 0, ridge = FALSE)
+
+Charlotte_Chinese = subset(yelp_Chinese, L == "Charlotte")[,3:43]
+Chinese002 = vector(10, mode = "list")
+
+for (i in 1:10)
+  Chinese002[[i]] = xval.the.model(Charlotte_Chinese, alpha = 0, ridge = FALSE)
+
+pred.FastFood001.summary = sapply(FastFood001, `[[`, "predcor")
+post.FastFood001.summary = sapply(FastFood001, `[[`, "postcor")
+pred.FastFood002.summary = sapply(FastFood002, `[[`, "predcor")
+post.FastFood002.summary = sapply(FastFood002, `[[`, "postcor")
+pred.Chinese001.summary = sapply(Chinese001, `[[`, "predcor")
+post.Chinese001.summary = sapply(Chinese001, `[[`, "postcor")
+pred.Chinese002.summary = sapply(Chinese002, `[[`, "predcor")
+post.Chinese002.summary = sapply(Chinese002, `[[`, "postcor")
+```
+  
+Table 2. Start and End nodes of four final evaluation model  
+```{r Table02, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, results='asis', warning=FALSE, message=FALSE}
+require(xtable)
+Case = c("Phoenix: Fast Food","Charlotte: Fast Food", "Phoenix: Chinese", "Charlotte: Chinese")
+Start = c(FastFood_Variables_Tags[6+9], FastFood_Variables_Tags[6+10], FastFood_Variables_Tags[6+3], paste("Number of neighborhoods", Chinese_Variables_Tags[6+1]))
+End = c(   paste(FastFood_Variables_Tags[6+20], paste( FastFood_Variables_Tags[6+22], paste(FastFood_Variables_Tags[6+30], paste(FastFood_Variables_Tags[6+31], FastFood_Variables_Tags[6+34]) ) ) ),
+           paste('stars', paste(FastFood_Variables_Tags[6+7], paste(FastFood_Variables_Tags[6+17], paste(FastFood_Variables_Tags[6+22], paste(FastFood_Variables_Tags[6+30], paste(FastFood_Variables_Tags[6+31], paste(FastFood_Variables_Tags[6+33], paste(FastFood_Variables_Tags[6+34], FastFood_Variables_Tags[6+35]) ) ) ) ) ) ) ),
+           paste( FastFood_Variables_Tags[6+16], FastFood_Variables_Tags[6+34] ),
+           paste( Chinese_Variables_Tags[6+10], paste(Chinese_Variables_Tags[6+12], paste(Chinese_Variables_Tags[6+25], paste(Chinese_Variables_Tags[6+26], paste(Chinese_Variables_Tags[6+27], paste(Chinese_Variables_Tags[6+28], paste(Chinese_Variables_Tags[6+30], paste(Chinese_Variables_Tags[6+31], paste(Chinese_Variables_Tags[6+32], paste(Chinese_Variables_Tags[6+34], Chinese_Variables_Tags[6+36]) ) ) ) ) ) ) ) ) )
+)
+## Understand how to turn off comment from http://stackoverflow.com/questions/24400308/how-to-remove-the-lines-in-xtable-table-output-by-knitr
+options(xtable.comment = FALSE)
+tb <- xtable(data.frame(Case, Start, End))
+## Got the codes from http://stackoverflow.com/questions/17921819/r-to-latex-use-xtable-to-produce-long-table-with-line-wrapping
+align(tb) <- "lp{2in}p{3in}p{1in}"
+print.xtable(tb, floating=FALSE, include.rownames = FALSE)
+```
+
+Each final evaluation model showes us that the yelp users in Phoenix and in Charlotte start their evaluations from a specific and local attribute. Then the yelp users make ther final recommendations based on the other attributes. In addition to the number of neighborhoods, no variables out of the attributes represent the starting point to evaluate a business in any case. The correlations of every variable and attributes were computed before and after training the final evaluation models. The results listed in Table 3 matched our purpose.  
+
+Table 3. Predictive and post correlations of variables and avergae attributes.  
+```{r Table03, cache.path="../Yelp_Data/", cache=TRUE, echo=FALSE, results='asis', warning=FALSE, message=FALSE}
+Category = c("Fast Food"," "," "," ", "Chinese Resturant"," "," "," ")
+City = rep(c("Phoenix"," ","Charlotte"," "), 2)
+Correlation = rep(c("predict","post"),4)
+summary.tb <- t(cbind(pred = c(rowMeans(pred.FastFood001.summary)[1:4],A = mean(rowMeans(pred.FastFood001.summary)[5:41]) ), 
+                      post = c(rowMeans(post.FastFood001.summary)[1:4],A = mean(rowMeans(post.FastFood001.summary)[5:41]) ),
+                      pred = c(rowMeans(pred.FastFood002.summary)[1:4],A = mean(rowMeans(pred.FastFood002.summary)[5:41]) ), 
+                      post = c(rowMeans(post.FastFood002.summary)[1:4],A = mean(rowMeans(post.FastFood002.summary)[5:41]) ),
+                      pred = c(rowMeans(pred.Chinese001.summary)[1:4], A = mean(rowMeans(pred.Chinese001.summary)[5:41]) ),
+                      post = c(rowMeans(post.Chinese001.summary)[1:4], A = mean(rowMeans(post.Chinese001.summary)[5:41]) ),
+                      pred = c(rowMeans(pred.Chinese002.summary)[1:4], A = mean(rowMeans(pred.Chinese002.summary)[5:41]) ),
+                      post = c(rowMeans(post.Chinese002.summary)[1:4], A = mean(rowMeans(post.Chinese002.summary)[5:41]) ) ) ) 
+
+require(xtable)
+options(xtable.comment = FALSE)
+Brief.tb <- xtable(cbind(Category, City, Correlation, round(summary.tb, digits = 3) ))
+## Understand how to turn off comment from http://stackoverflow.com/questions/24400308/how-to-remove-the-lines-in-xtable-table-output-by-knitr
+print.xtable(Brief.tb, floating=FALSE, include.rownames = FALSE)
+```
+# Discussion
+About the evluation process in Yelp users' minds, we learned the following facts in this projecet:  
+1. Yelp stars is the final criterion for the businesses that have managed the chained stores across many cities, such as the fast food. For many local businesses, yelp stars is the intermediate factor to access the cities.  
+2. In every city, a category of businesses has the specific attributes being the starting point to be chosen as the potential shop. The local residents and the tourists could give the businesses the final recommendations attributes by attributes.  
+  
+These facts will be benefitial to these readers:  
+1. **Customers:** People will know how to pick up a shop matched the personal flavor based on where they live or where they will visit.  
+2. **Business owners:** For who will open a shop in a city, they could understand the attributes that are mostly considered by the customers. For who is running a shop, they could review the advantages and disadvantages of the current management strategies.  
+3. **Yelp software engineers:** The enginners could create the apps for the local services. The apps connect Yelp's recommandation engine and filter the review articles and tips that mention the key words to evluate a category of businesses in a city. To make the apps dominate the least evaluation criterions, the engineers are able to adjust the variables and attributes at the server according to the last analysis of Bayesian network.
+
+# Acknowledge
+Readers could check the full size graphical models in our [rough report](http://scgeeker.github.io/Capstone_Yelp/Tasks.html).
+
+[1]: https://class.coursera.org/dsscapstone-005
+[2]: http://officialblog.yelp.com/2013/11/yelp-recommended-reviews.html "How Yelp Helps You Find the Right Local Business"
+[3]: https://en.wikipedia.org/wiki/Bayesian_network "Wikipedia: Bayesian network"
+[4]: http://www.bnlearn.com/research/genetics14/ "Scutari, Howell, Balding, Mackay (Genetics, 2014)"
